@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './UsernameInput.css';
 
 interface UsernameInputProps {
@@ -13,6 +13,12 @@ export const UsernameInput: React.FC<UsernameInputProps> = ({
     buttonText = 'Submit'
 }) => {
     const [username, setUsername] = useState(initialUsername);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        // Focus the input field when the component mounts
+        inputRef.current?.focus();
+    }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -24,6 +30,7 @@ export const UsernameInput: React.FC<UsernameInputProps> = ({
     return (
         <form className="username-form" onSubmit={handleSubmit}>
             <input
+                ref={inputRef}
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
