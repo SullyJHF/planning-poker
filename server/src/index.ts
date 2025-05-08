@@ -23,22 +23,33 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
 });
 
+// Function to broadcast room list to all clients
+const broadcastRoomList = () => {
+    const rooms = roomManager.getActiveRooms();
+    io.emit('roomList', rooms);
+};
+
 // Socket.IO connection handling
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
 
+    // Send initial room list to the new client
+    socket.emit('roomList', roomManager.getActiveRooms());
+
     socket.on('createRoom', (data: { roomId: string; username: string; }) => {
         try {
-            roomManager.createRoom(data.roomId);
-            if (roomManager.joinRoom(data.roomId, socket.id, data.username)) {
-                socket.join(data.roomId);
-                console.log(`Room created: ${data.roomId} by ${data.username}`);
-                socket.emit('roomCreated', data.roomId);
+            roomManager.createRoom(data.roomId, socket.id, data.username);
+            socket.join(data.roomId);
+            console.log(`Room created: ${data.roomId} by ${data.username}`);
+            socket.emit('roomCreated', data.roomId);
 
-                // Send current room state
-                const users = roomManager.getRoomUsers(data.roomId);
-                io.to(data.roomId).emit('roomState', { users });
-            }
+            // Send current room state
+            const users = roomManager.getRoomUsers(data.roomId);
+            const hostId = roomManager.getHostId(data.roomId);
+            io.to(data.roomId).emit('roomState', { users, hostId });
+
+            // Broadcast updated room list
+            broadcastRoomList();
         } catch (error) {
             socket.emit('error', 'Failed to create room');
         }
@@ -56,7 +67,11 @@ io.on('connection', (socket) => {
 
                 // Send current room state
                 const users = roomManager.getRoomUsers(data.roomId);
-                io.to(data.roomId).emit('roomState', { users });
+                const hostId = roomManager.getHostId(data.roomId);
+                io.to(data.roomId).emit('roomState', { users, hostId });
+
+                // Broadcast updated room list
+                broadcastRoomList();
             } else {
                 socket.emit('error', 'Room not found');
             }
@@ -72,7 +87,11 @@ io.on('connection', (socket) => {
 
             // Send updated room state
             const users = roomManager.getRoomUsers(data.roomId);
-            io.to(data.roomId).emit('roomState', { users });
+            const hostId = roomManager.getHostId(data.roomId);
+            io.to(data.roomId).emit('roomState', { users, hostId });
+
+            // Broadcast updated room list
+            broadcastRoomList();
         }
     });
 
@@ -85,6 +104,29 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('leaveRoom', ({ roomId }) => {
+        if (roomManager.leaveRoom(roomId, socket.id)) {
+            socket.leave(roomId);
+            socket.emit('roomLeft');
+
+            // Notify remaining users in the room
+            const room = roomManager.getRoomUsers(roomId);
+            if (room.length > 0) {
+                const hostId = roomManager.getHostId(roomId);
+                if (hostId) {
+                    io.to(roomId).emit('roomState', { users: room, hostId });
+                    io.to(roomId).emit('hostChanged', hostId);
+                }
+            }
+        }
+    });
+
+    socket.on('transferHost', ({ roomId, newHostId }) => {
+        if (roomManager.transferHost(roomId, socket.id, newHostId)) {
+            io.to(roomId).emit('hostChanged', newHostId);
+        }
+    });
+
     socket.on('disconnect', () => {
         console.log('Client disconnected:', socket.id);
         // Remove user from all rooms and clean up votes
@@ -94,9 +136,13 @@ io.on('connection', (socket) => {
         socket.rooms.forEach(roomId => {
             if (roomId !== socket.id) { // socket.id is always in socket.rooms
                 const users = roomManager.getRoomUsers(roomId);
-                io.to(roomId).emit('roomState', { users });
+                const hostId = roomManager.getHostId(roomId);
+                io.to(roomId).emit('roomState', { users, hostId });
             }
         });
+
+        // Broadcast updated room list
+        broadcastRoomList();
     });
 });
 

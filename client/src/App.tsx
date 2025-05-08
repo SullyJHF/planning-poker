@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { CardDeck, CardValue } from './components/CardDeck';
 import { UsernameInput } from './components/UsernameInput';
+import { Room, RoomList } from './components/RoomList';
 import './App.css';
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL || 'http://localhost:3001';
@@ -25,6 +26,9 @@ function App() {
     const [votes, setVotes] = useState<Record<string, Vote>>({});
     const [users, setUsers] = useState<User[]>([]);
     const [showUsernameInput, setShowUsernameInput] = useState(true);
+    const [activeRooms, setActiveRooms] = useState<Room[]>([]);
+    const [isHost, setIsHost] = useState(false);
+    const [hostId, setHostId] = useState<string>('');
 
     useEffect(() => {
         const newSocket = io(SERVER_URL);
@@ -40,8 +44,14 @@ function App() {
             console.log('Disconnected from server');
         });
 
-        newSocket.on('roomState', (data: { users: User[]; }) => {
+        newSocket.on('roomList', (rooms: Room[]) => {
+            setActiveRooms(rooms);
+        });
+
+        newSocket.on('roomState', (data: { users: User[]; hostId: string; }) => {
             setUsers(data.users);
+            setHostId(data.hostId);
+            setIsHost(data.hostId === newSocket.id);
         });
 
         newSocket.on('votesUpdated', (newVotes: Record<string, Vote>) => {
@@ -54,6 +64,11 @@ function App() {
 
         newSocket.on('usernameUpdated', (user: User) => {
             console.log(`Username updated: ${user.username}`);
+        });
+
+        newSocket.on('hostChanged', (newHostId: string) => {
+            setHostId(newHostId);
+            setIsHost(newHostId === newSocket.id);
         });
 
         return () => {
@@ -78,6 +93,21 @@ function App() {
         if (socket && username) {
             socket.emit('joinRoom', { roomId, username });
             setRoomId(roomId);
+        }
+    };
+
+    const handleLeaveRoom = () => {
+        if (socket && roomId) {
+            socket.emit('leaveRoom', { roomId });
+            setRoomId('');
+            setVotes({});
+            setSelectedCard(undefined);
+        }
+    };
+
+    const handleTransferHost = (newHostId: string) => {
+        if (socket && roomId && isHost) {
+            socket.emit('transferHost', { roomId, newHostId });
         }
     };
 
@@ -116,22 +146,30 @@ function App() {
                 {!roomId ? (
                     <div className="room-controls">
                         <button onClick={handleCreateRoom}>Create New Room</button>
-                        <div className="join-room">
-                            <input
-                                type="text"
-                                placeholder="Enter Room ID"
-                                onChange={(e) => handleJoinRoom(e.target.value)}
-                            />
-                        </div>
+                        <RoomList rooms={activeRooms} onJoinRoom={handleJoinRoom} />
                     </div>
                 ) : (
                     <>
                         <p>Room ID: {roomId}</p>
                         <div className="users-list">
-                            <h3>Users in Room:</h3>
+                            <h3>Players in Room:</h3>
                             {users.map(user => (
                                 <div key={user.id} className="user">
                                     {user.username} {user.id === socket?.id && '(You)'}
+                                    {isHost && user.id !== socket?.id && (
+                                        <button
+                                            className="transfer-host-btn"
+                                            onClick={() => handleTransferHost(user.id)}
+                                            title="Make host"
+                                        >
+                                            <i className="fas fa-crown"></i>
+                                        </button>
+                                    )}
+                                    {user.id === hostId && (
+                                        <span className="host-badge" title="Room host">
+                                            <i className="fas fa-crown"></i>
+                                        </span>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -144,6 +182,9 @@ function App() {
                                 </div>
                             ))}
                         </div>
+                        <button className="leave-room-btn" onClick={handleLeaveRoom}>
+                            Leave Room
+                        </button>
                     </>
                 )}
             </header>

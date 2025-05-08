@@ -7,6 +7,13 @@ interface Room {
     id: string;
     votes: Record<string, string>;
     users: Map<string, User>;
+    hostId: string;
+}
+
+interface RoomInfo {
+    id: string;
+    userCount: number;
+    hostUsername: string;
 }
 
 export class RoomManager {
@@ -16,7 +23,7 @@ export class RoomManager {
         this.rooms = new Map();
     }
 
-    createRoom(roomId: string): void {
+    createRoom(roomId: string, hostId: string, hostUsername: string): void {
         if (this.rooms.has(roomId)) {
             throw new Error('Room already exists');
         }
@@ -24,7 +31,8 @@ export class RoomManager {
         this.rooms.set(roomId, {
             id: roomId,
             votes: {},
-            users: new Map()
+            users: new Map([[hostId, { id: hostId, username: hostUsername }]]),
+            hostId
         });
     }
 
@@ -69,6 +77,14 @@ export class RoomManager {
             if (room.users.has(userId)) {
                 room.users.delete(userId);
                 delete room.votes[userId];
+
+                // If the host disconnects, assign a new host
+                if (room.hostId === userId && room.users.size > 0) {
+                    const newHost = room.users.keys().next().value;
+                    if (newHost) {
+                        room.hostId = newHost;
+                    }
+                }
             }
         });
     }
@@ -96,6 +112,17 @@ export class RoomManager {
         return Array.from(room.users.values());
     }
 
+    getActiveRooms(): RoomInfo[] {
+        return Array.from(this.rooms.entries()).map(([id, room]) => {
+            const host = room.users.get(room.hostId);
+            return {
+                id,
+                userCount: room.users.size,
+                hostUsername: host?.username || 'Unknown'
+            };
+        });
+    }
+
     clearVotes(roomId: string): boolean {
         const room = this.rooms.get(roomId);
         if (!room) {
@@ -104,5 +131,45 @@ export class RoomManager {
 
         room.votes = {};
         return true;
+    }
+
+    leaveRoom(roomId: string, userId: string): boolean {
+        const room = this.rooms.get(roomId);
+        if (!room || !room.users.has(userId)) {
+            return false;
+        }
+
+        room.users.delete(userId);
+        delete room.votes[userId];
+
+        // If the host leaves, assign a new host
+        if (room.hostId === userId && room.users.size > 0) {
+            const newHost = room.users.keys().next().value;
+            if (newHost) {
+                room.hostId = newHost;
+            }
+        }
+
+        // If no users left, delete the room
+        if (room.users.size === 0) {
+            this.rooms.delete(roomId);
+        }
+
+        return true;
+    }
+
+    transferHost(roomId: string, currentHostId: string, newHostId: string): boolean {
+        const room = this.rooms.get(roomId);
+        if (!room || room.hostId !== currentHostId || !room.users.has(newHostId)) {
+            return false;
+        }
+
+        room.hostId = newHostId;
+        return true;
+    }
+
+    getHostId(roomId: string): string | null {
+        const room = this.rooms.get(roomId);
+        return room ? room.hostId : null;
     }
 } 

@@ -64,6 +64,47 @@
   margin: 0.5rem 0;
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.host-badge {
+  color: #ffd700;
+  margin-left: 0.5rem;
+  font-size: 1.1rem;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+.transfer-host-btn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: color 0.2s;
+  font-size: 1.1rem;
+}
+
+.transfer-host-btn:hover {
+  color: #ffd700;
+}
+
+.leave-room-btn {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background-color: #dc3545;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.leave-room-btn:hover {
+  background-color: #c82333;
 }
 
 .votes {
