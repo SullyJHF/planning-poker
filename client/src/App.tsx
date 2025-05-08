@@ -6,6 +6,8 @@ import { Room, RoomList } from './components/RoomList';
 import './App.css';
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL || 'http://localhost:3001';
+const CONNECTION_CHECK_INTERVAL = 5000; // Check every 5 seconds
+const PING_TIMEOUT = 2000; // Wait 2 seconds for pong response
 
 interface User {
     id: string;
@@ -31,7 +33,12 @@ function App() {
     const [hostId, setHostId] = useState<string>('');
 
     useEffect(() => {
-        const newSocket = io(SERVER_URL);
+        const newSocket = io(SERVER_URL, {
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            timeout: 10000
+        });
         setSocket(newSocket);
 
         newSocket.on('connect', () => {
@@ -43,6 +50,45 @@ function App() {
             setConnected(false);
             console.log('Disconnected from server');
         });
+
+        newSocket.on('connect_error', (error) => {
+            setConnected(false);
+            console.log('Connection error:', error);
+        });
+
+        newSocket.on('reconnect_attempt', () => {
+            setConnected(false);
+            console.log('Attempting to reconnect...');
+        });
+
+        newSocket.on('reconnect_failed', () => {
+            setConnected(false);
+            console.log('Failed to reconnect');
+        });
+
+        newSocket.on('pong', () => {
+            setConnected(true);
+        });
+
+        // Set up periodic connection check
+        const checkConnection = () => {
+            if (newSocket) {
+                // Set a timeout to mark as disconnected if no pong received
+                const timeoutId = setTimeout(() => {
+                    setConnected(false);
+                }, PING_TIMEOUT);
+
+                // Send ping and clear timeout if pong received
+                newSocket.emit('ping', (response: boolean) => {
+                    if (response) {
+                        setConnected(true);
+                        clearTimeout(timeoutId);
+                    }
+                });
+            }
+        };
+
+        const intervalId = setInterval(checkConnection, CONNECTION_CHECK_INTERVAL);
 
         newSocket.on('roomList', (rooms: Room[]) => {
             setActiveRooms(rooms);
@@ -72,7 +118,9 @@ function App() {
         });
 
         return () => {
+            clearInterval(intervalId);
             newSocket.close();
+            setConnected(false);
         };
     }, []);
 
@@ -139,8 +187,11 @@ function App() {
     return (
         <div className="App">
             <header className="App-header">
+                <div className={`connection-status ${connected ? 'connected' : 'disconnected'}`}>
+                    <i className={`fas fa-circle ${connected ? 'fa-bounce' : ''}`}></i>
+                    {connected ? 'Connected' : 'Disconnected'}
+                </div>
                 <h1>Planning Poker</h1>
-                <p>Connection status: {connected ? 'Connected' : 'Disconnected'}</p>
                 <p>Username: {username} <button onClick={() => setShowUsernameInput(true)}>Change</button></p>
 
                 {!roomId ? (

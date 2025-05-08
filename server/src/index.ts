@@ -36,6 +36,10 @@ io.on('connection', (socket) => {
     // Send initial room list to the new client
     socket.emit('roomList', roomManager.getActiveRooms());
 
+    socket.on('ping', (callback: (response: boolean) => void) => {
+        callback(true);
+    });
+
     socket.on('createRoom', (data: { roomId: string; username: string; }) => {
         try {
             roomManager.createRoom(data.roomId, socket.id, data.username);

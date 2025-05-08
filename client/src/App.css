@@ -11,6 +11,30 @@
   justify-content: flex-start;
   padding: 2rem;
   color: white;
+  position: relative;
+}
+
+.connection-status {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.connection-status i {
+  font-size: 1rem;
+}
+
+.connection-status.connected {
+  color: #4caf50;
+}
+
+.connection-status.disconnected {
+  color: #f44336;
 }
 
 .room-controls {
