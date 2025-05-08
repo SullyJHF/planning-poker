@@ -61,7 +61,12 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
 
     return (
         <>
-            <p>Room ID: {roomId}</p>
+            <div className="room-header">
+                <span className="room-id">Room ID: {roomId}</span>
+                <button className="leave-room-btn" onClick={onLeaveRoom}>
+                    Leave Room
+                </button>
+            </div>
             <div className="users-list">
                 <h3>Players in Room:</h3>
                 {users.map(user => (
@@ -93,9 +98,6 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
                     </div>
                 ))}
             </div>
-            <button className="leave-room-btn" onClick={onLeaveRoom}>
-                Leave Room
-            </button>
         </>
     );
 }; 

@@ -117,22 +117,6 @@
   color: #ffd700;
 }
 
-.leave-room-btn {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  background-color: #dc3545;
-  border: none;
-  border-radius: 4px;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.leave-room-btn:hover {
-  background-color: #c82333;
-}
-
 .votes {
   margin-top: 2rem;
   background-color: rgba(255, 255, 255, 0.1);
