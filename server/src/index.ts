@@ -118,12 +118,16 @@ io.on('connection', (socket) => {
                     io.to(roomId).emit('hostChanged', hostId);
                 }
             }
+            // Broadcast updated room list when someone leaves
+            broadcastRoomList();
         }
     });
 
     socket.on('transferHost', ({ roomId, newHostId }) => {
         if (roomManager.transferHost(roomId, socket.id, newHostId)) {
             io.to(roomId).emit('hostChanged', newHostId);
+            // Broadcast updated room list when host changes
+            broadcastRoomList();
         }
     });
 
