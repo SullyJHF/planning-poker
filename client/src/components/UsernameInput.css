@@ -1,0 +1,37 @@
+.username-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+.username-form input {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 2px solid #61dafb;
+    border-radius: 4px;
+    background-color: #282c34;
+    color: white;
+    width: 200px;
+}
+
+.username-form input:focus {
+    outline: none;
+    border-color: #4fa8c7;
+}
+
+.username-form button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    background-color: #61dafb;
+    border: none;
+    border-radius: 4px;
+    color: #282c34;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.username-form button:hover {
+    background-color: #4fa8c7;
+} 
