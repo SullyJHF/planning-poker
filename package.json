@@ -1,0 +1,20 @@
+{
+    "name": "planning-poker",
+    "version": "1.0.0",
+    "description": "A planning poker web application",
+    "private": true,
+    "workspaces": [
+        "client",
+        "server"
+    ],
+    "scripts": {
+        "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
+        "start:client": "npm run start --workspace=client",
+        "start:server": "npm run start --workspace=server",
+        "build": "npm run build --workspaces",
+        "test": "npm run test --workspaces"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}
