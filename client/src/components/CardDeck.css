@@ -1,36 +1,134 @@
 .card-deck {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
     justify-content: center;
     padding: 1rem;
+    width: 100%;
+    max-width: 1200px;
+    perspective: 1000px;
 }
+
+.card-container {
+    position: relative;
+    margin: 0 -20px;
+}
+
+.card-hover-area {
+    position: absolute;
+    width: 60px;
+    height: 140px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 3;
+    padding: 0;
+    /* background: #ff00ff44; */
+    transform-origin: center bottom;
+    left: 13px;
+}
+
+/* Position hover areas to match card positions */
+.card-hover-area[data-index="0"] { transform: rotate(-24deg) translateY(30px); }
+.card-hover-area[data-index="1"] { transform: rotate(-18deg) translateY(18px); }
+.card-hover-area[data-index="2"] { transform: rotate(-12deg) translateY(9px); }
+.card-hover-area[data-index="3"] { transform: rotate(-6deg) translateY(3px); }
+.card-hover-area[data-index="4"] { transform: rotate(0deg) translateY(0px); }
+.card-hover-area[data-index="5"] { transform: rotate(6deg) translateY(3px); }
+.card-hover-area[data-index="6"] { transform: rotate(12deg) translateY(9px); }
+.card-hover-area[data-index="7"] { transform: rotate(18deg) translateY(18px); }
+.card-hover-area[data-index="8"] { transform: rotate(24deg) translateY(30px); }
 
 .card {
     width: 80px;
     height: 120px;
-    border: 2px solid #ccc;
+    border: 2px solid #e0e0e0;
     border-radius: 8px;
-    background: white;
+    background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
     font-size: 1.5rem;
     font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    transform-origin: center bottom;
+    transition: all 0.2s ease;
+    pointer-events: none;
+    color: #333;
+    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
 }
 
-.card:hover {
-    transform: translateY(-5px);
+/* Add decorative corner elements */
+.card::before,
+.card::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+.card::before {
+    top: 8px;
+    left: 8px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.card::after {
+    bottom: 8px;
+    right: 8px;
+    border-left: none;
+    border-top: none;
+}
+
+/* Fan out the cards in a semicircle */
+.card[data-index="0"] { transform: rotate(-24deg) translateY(30px); }
+.card[data-index="1"] { transform: rotate(-18deg) translateY(18px); }
+.card[data-index="2"] { transform: rotate(-12deg) translateY(9px); }
+.card[data-index="3"] { transform: rotate(-6deg) translateY(3px); }
+.card[data-index="4"] { transform: rotate(0deg) translateY(0px); }
+.card[data-index="5"] { transform: rotate(6deg) translateY(3px); }
+.card[data-index="6"] { transform: rotate(12deg) translateY(9px); }
+.card[data-index="7"] { transform: rotate(18deg) translateY(18px); }
+.card[data-index="8"] { transform: rotate(24deg) translateY(30px); }
+
+/* Hover effects that move cards outward along their rotation */
+.card.hover[data-index="0"] { transform: rotate(-24deg) translateY(30px) translate(-20px, -20px) !important; }
+.card.hover[data-index="1"] { transform: rotate(-18deg) translateY(18px) translate(-15px, -20px) !important; }
+.card.hover[data-index="2"] { transform: rotate(-12deg) translateY(9px) translate(-10px, -20px) !important; }
+.card.hover[data-index="3"] { transform: rotate(-6deg) translateY(3px) translate(-5px, -20px) !important; }
+.card.hover[data-index="4"] { transform: rotate(0deg) translateY(0px) translate(0, -20px) !important; }
+.card.hover[data-index="5"] { transform: rotate(6deg) translateY(3px) translate(5px, -20px) !important; }
+.card.hover[data-index="6"] { transform: rotate(12deg) translateY(9px) translate(10px, -20px) !important; }
+.card.hover[data-index="7"] { transform: rotate(18deg) translateY(18px) translate(15px, -20px) !important; }
+.card.hover[data-index="8"] { transform: rotate(24deg) translateY(30px) translate(20px, -20px) !important; }
+
+.card.hover {
+    z-index: 3;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-color: #666;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
 }
 
 .card.selected {
-    background: #e3f2fd;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
     border-color: #2196f3;
-    transform: translateY(-5px);
+    z-index: 2;
     box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
-} 
+}
+
+/* Selected state matches hover movement */
+.card.selected[data-index="0"] { transform: rotate(-24deg) translateY(30px) translate(-20px, -20px) !important; }
+.card.selected[data-index="1"] { transform: rotate(-18deg) translateY(18px) translate(-15px, -20px) !important; }
+.card.selected[data-index="2"] { transform: rotate(-12deg) translateY(9px) translate(-10px, -20px) !important; }
+.card.selected[data-index="3"] { transform: rotate(-6deg) translateY(3px) translate(-5px, -20px) !important; }
+.card.selected[data-index="4"] { transform: rotate(0deg) translateY(0px) translate(0, -20px) !important; }
+.card.selected[data-index="5"] { transform: rotate(6deg) translateY(3px) translate(5px, -20px) !important; }
+.card.selected[data-index="6"] { transform: rotate(12deg) translateY(9px) translate(10px, -20px) !important; }
+.card.selected[data-index="7"] { transform: rotate(18deg) translateY(18px) translate(15px, -20px) !important; }
+.card.selected[data-index="8"] { transform: rotate(24deg) translateY(30px) translate(20px, -20px) !important; } 
