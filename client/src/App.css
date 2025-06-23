@@ -142,6 +142,32 @@
   justify-content: center;
 }
 
+.lobby-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-btn {
+  background: none;
+  border: none;
+  color: #6c7086;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-btn:hover {
+  color: #cdd6f4;
+  background: rgba(108, 112, 134, 0.2);
+  transform: translateY(-1px);
+}
+
 .lobby-header {
   margin-bottom: 1rem;
 }

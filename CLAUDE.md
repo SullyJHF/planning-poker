@@ -45,17 +45,18 @@ This is a **real-time planning poker application** built with a React frontend a
 ### Key Data Flow
 
 1. **Socket Connection**: SocketContext establishes WebSocket connection with automatic reconnection
-2. **Room Management**: RoomManager handles all room state (users, votes, tasks, host transfers)
+2. **Room Management**: RoomManager handles all room state (users, votes, tickets, host transfers, Jira settings)
 3. **Real-time Updates**: All state changes broadcast to relevant room participants via Socket.IO
-4. **Host Privileges**: Only room hosts can create/modify tasks and transfer host status
+4. **Collaborative Tickets**: Any user can create tickets; hosts manage room settings and voting
 
 ### Socket Events
 
 Main events handled in server/src/index.ts:
 - Room lifecycle: `createRoom`, `joinRoom`, `leaveRoom`
-- Voting: `vote`, `votesUpdated`
-- Task management: `createTask`, `updateTask`, `deleteTask`, `setCurrentTask`
+- Voting: `vote`, `votesUpdated`, `startVoting`, `revealVotes`, `resetVoting`, `finalizeEstimate`
+- Ticket management: `createTask`, `updateTask`, `deleteTask`, `setCurrentTask`
 - Host management: `transferHost`, `hostChanged`
+- Jira integration: `updateJiraBaseUrl`, `jiraBaseUrlUpdated`
 
 ### Environment Setup
 
@@ -80,25 +81,30 @@ REACT_APP_SERVER_URL=http://localhost:3001
 - Consistent button styling with blue (`#89b4fa`) primary color
 - Card-based design with rounded corners and subtle borders
 
-## Task Management Features
+## Ticket Management Features
 
-### Task Properties
-- Title (required), description (optional), Jira link (optional)
+### Ticket Properties
+- Ticket ID (required, e.g., PROJ-123) - primary identifier
+- Description (optional) - context and details
 - Status: pending, in_progress, completed
 - Final estimate (set after voting completion)
 - Creation timestamp
 
-### Host Capabilities
-- Create, edit, and delete tasks
-- Set current task for voting
-- Update task status and final estimates
-- Transfer host privileges to other users
+### User Capabilities
+- **All Users**: Create, edit tickets (collaborative workflow)
+- **Hosts Only**: Configure Jira base URL, manage voting sessions, set current ticket
 
-### Task UI
-- Integrated sidebar in room view
-- Add button in header (matches room list pattern)
-- Status icons with Font Awesome
-- Hover actions for host (edit, delete, select)
+### Jira Integration
+- **Per-Room Configuration**: Each room has its own Jira base URL setting
+- **Conditional Linking**: Ticket IDs become clickable links only when URL is configured
+- **Auto-normalization**: URLs automatically get trailing slash if missing
+- **Host-Only Settings**: Gear icon in ticket list for Jira configuration
+
+### Ticket UI
+- **Newest First**: New tickets appear at top of list
+- **Always-Visible Controls**: Host action buttons (play, edit, delete) always visible with hover effects
+- **Streamlined Form**: Just ticket ID (required) and description (optional)
+- **Smart Linking**: Ticket titles become links when Jira URL is set, plain text otherwise
 
 ## Development Notes
 
@@ -109,3 +115,5 @@ REACT_APP_SERVER_URL=http://localhost:3001
 - Room cleanup when last user leaves
 - Font Awesome integration for consistent iconography
 - Responsive three-column layout with proper overflow handling
+- Don't ever run npm start, I will do that myself and test changes there
+- You can run npm run build to check for build errors though

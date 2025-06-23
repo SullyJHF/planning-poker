@@ -52,7 +52,8 @@ io.on('connection', (socket) => {
             const hostId = roomManager.getHostId(data.roomId);
             const tasks = roomManager.getTasks(data.roomId);
             const currentTask = roomManager.getCurrentTask(data.roomId);
-            io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id });
+            const jiraBaseUrl = roomManager.getJiraBaseUrl(data.roomId);
+            io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
 
             // Broadcast updated room list
             broadcastRoomList();
@@ -77,8 +78,9 @@ io.on('connection', (socket) => {
                 const tasks = roomManager.getTasks(data.roomId);
                 const currentTask = roomManager.getCurrentTask(data.roomId);
                 const sessionState = roomManager.getSessionState(data.roomId);
+                const jiraBaseUrl = roomManager.getJiraBaseUrl(data.roomId);
                 
-                io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id });
+                io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
                 
                 // Send current votes and session state to the new user
                 const votes = roomManager.getRoomVotes(data.roomId);
@@ -107,7 +109,8 @@ io.on('connection', (socket) => {
             const hostId = roomManager.getHostId(data.roomId);
             const tasks = roomManager.getTasks(data.roomId);
             const currentTask = roomManager.getCurrentTask(data.roomId);
-            io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id });
+            const jiraBaseUrl = roomManager.getJiraBaseUrl(data.roomId);
+            io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
 
             // Broadcast updated room list
             broadcastRoomList();
@@ -135,7 +138,8 @@ io.on('connection', (socket) => {
                 if (hostId) {
                     const tasks = roomManager.getTasks(roomId);
                     const currentTask = roomManager.getCurrentTask(roomId);
-                    io.to(roomId).emit('roomState', { users: room, hostId, tasks, currentTaskId: currentTask?.id });
+                    const jiraBaseUrl = roomManager.getJiraBaseUrl(roomId);
+                    io.to(roomId).emit('roomState', { users: room, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
                     io.to(roomId).emit('hostChanged', hostId);
                 }
             }
@@ -237,6 +241,12 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('updateJiraBaseUrl', ({ roomId, jiraBaseUrl }) => {
+        if (roomManager.updateJiraBaseUrl(roomId, socket.id, jiraBaseUrl)) {
+            io.to(roomId).emit('jiraBaseUrlUpdated', { jiraBaseUrl });
+        }
+    });
+
     socket.on('disconnect', () => {
         console.log('Client disconnected:', socket.id);
         // Remove user from all rooms and clean up votes
@@ -249,7 +259,8 @@ io.on('connection', (socket) => {
                 const hostId = roomManager.getHostId(roomId);
                 const tasks = roomManager.getTasks(roomId);
                 const currentTask = roomManager.getCurrentTask(roomId);
-                io.to(roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id });
+                const jiraBaseUrl = roomManager.getJiraBaseUrl(roomId);
+                io.to(roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
             }
         });
 

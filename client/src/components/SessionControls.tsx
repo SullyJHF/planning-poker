@@ -25,7 +25,7 @@ interface SessionControlsProps {
     estimationResult?: EstimationResult;
     currentTask?: {
         id: string;
-        title: string;
+        ticketId: string;
         description?: string;
     };
     isHost: boolean;

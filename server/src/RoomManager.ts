@@ -5,9 +5,8 @@ interface User {
 
 interface Task {
     id: string;
-    title: string;
+    ticketId: string;
     description?: string;
-    link?: string;
     status: 'pending' | 'in_progress' | 'completed';
     finalEstimate?: string;
     createdAt: Date;
@@ -32,6 +31,7 @@ interface Room {
     currentTaskId?: string;
     sessionPhase: SessionPhase;
     estimationResult?: EstimationResult;
+    jiraBaseUrl: string;
 }
 
 interface RoomInfo {
@@ -60,7 +60,8 @@ export class RoomManager {
             tasks: [],
             currentTaskId: undefined,
             sessionPhase: 'idle',
-            estimationResult: undefined
+            estimationResult: undefined,
+            jiraBaseUrl: ''
         });
     }
 
@@ -229,7 +230,7 @@ export class RoomManager {
             createdAt: new Date()
         };
 
-        room.tasks.push(newTask);
+        room.tasks.unshift(newTask);
         return newTask;
     }
 
@@ -376,6 +377,21 @@ export class RoomManager {
             phase: room.sessionPhase,
             estimationResult: room.estimationResult
         };
+    }
+
+    updateJiraBaseUrl(roomId: string, hostId: string, jiraBaseUrl: string): boolean {
+        const room = this.rooms.get(roomId);
+        if (!room || room.hostId !== hostId) {
+            return false;
+        }
+
+        room.jiraBaseUrl = jiraBaseUrl;
+        return true;
+    }
+
+    getJiraBaseUrl(roomId: string): string | null {
+        const room = this.rooms.get(roomId);
+        return room ? room.jiraBaseUrl : null;
     }
 
     private calculateEstimationResult(votes: Record<string, string>): EstimationResult {

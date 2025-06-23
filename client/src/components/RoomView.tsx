@@ -39,17 +39,21 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
     const [currentTask, setCurrentTask] = useState<Task | null>(null);
     const [sessionPhase, setSessionPhase] = useState<SessionPhase>('idle');
     const [estimationResult, setEstimationResult] = useState<EstimationResult>();
+    const [jiraBaseUrl, setJiraBaseUrl] = useState<string>('');
 
     useEffect(() => {
         if (!socket) return;
 
-        socket.on('roomState', (data: { users: User[]; hostId: string; tasks: Task[]; currentTaskId?: string; }) => {
+        socket.on('roomState', (data: { users: User[]; hostId: string; tasks: Task[]; currentTaskId?: string; jiraBaseUrl?: string; }) => {
             setUsers(data.users);
             setHostId(data.hostId);
             setIsHost(data.hostId === socket.id);
             setTasks(data.tasks || []);
             setCurrentTaskId(data.currentTaskId);
             setCurrentTask(data.currentTaskId ? data.tasks?.find(t => t.id === data.currentTaskId) || null : null);
+            if (data.jiraBaseUrl !== undefined) {
+                setJiraBaseUrl(data.jiraBaseUrl);
+            }
         });
 
         socket.on('votesUpdated', (newVotes: Record<string, Vote>) => {
@@ -91,6 +95,10 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
             setEstimationResult(result);
         });
 
+        socket.on('jiraBaseUrlUpdated', ({ jiraBaseUrl: newJiraBaseUrl }: { jiraBaseUrl: string }) => {
+            setJiraBaseUrl(newJiraBaseUrl);
+        });
+
         return () => {
             socket.off('roomState');
             socket.off('votesUpdated');
@@ -98,6 +106,7 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
             socket.off('tasksUpdated');
             socket.off('sessionStateUpdated');
             socket.off('estimationResult');
+            socket.off('jiraBaseUrlUpdated');
         };
     }, [socket]);
 
@@ -165,6 +174,12 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
         }
     };
 
+    const handleUpdateJiraBaseUrl = (newJiraBaseUrl: string) => {
+        if (socket && roomId && isHost) {
+            socket.emit('updateJiraBaseUrl', { roomId, jiraBaseUrl: newJiraBaseUrl });
+        }
+    };
+
     return (
         <div className="room-container">
             <div className="room-content">
@@ -201,16 +216,17 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
                     {currentTask && (
                         <div className="current-task-info">
                             <h3>Current Task</h3>
-                            <div className="task-title">{currentTask.title}</div>
+                            <div className="task-title">
+                                {jiraBaseUrl ? (
+                                    <a href={`${jiraBaseUrl}${currentTask.ticketId}`} target="_blank" rel="noopener noreferrer">
+                                        <FontAwesomeIcon icon={faLink} /> {currentTask.ticketId}
+                                    </a>
+                                ) : (
+                                    currentTask.ticketId
+                                )}
+                            </div>
                             {currentTask.description && (
                                 <div className="task-description">{currentTask.description}</div>
-                            )}
-                            {currentTask.link && (
-                                <div className="task-link">
-                                    <a href={currentTask.link} target="_blank" rel="noopener noreferrer">
-                                        <FontAwesomeIcon icon={faLink} /> View in Jira
-                                    </a>
-                                </div>
                             )}
                         </div>
                     )}
@@ -220,7 +236,7 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
                         estimationResult={estimationResult}
                         currentTask={currentTask ? {
                             id: currentTask.id,
-                            title: currentTask.title,
+                            ticketId: currentTask.ticketId,
                             description: currentTask.description
                         } : undefined}
                         isHost={isHost}
@@ -256,10 +272,12 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
                         tasks={tasks}
                         currentTaskId={currentTaskId}
                         isHost={isHost}
+                        jiraBaseUrl={jiraBaseUrl}
                         onCreateTask={handleCreateTask}
                         onUpdateTask={handleUpdateTask}
                         onDeleteTask={handleDeleteTask}
                         onSetCurrentTask={handleSetCurrentTask}
+                        onUpdateJiraBaseUrl={handleUpdateJiraBaseUrl}
                     />
                 </div>
             </div>

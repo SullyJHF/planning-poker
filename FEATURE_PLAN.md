@@ -11,6 +11,8 @@ The application currently supports:
 - **✅ Font Awesome Icon System** - Consistent iconography throughout the application
 - **✅ Dark Theme UI** - Modern three-column layout with Catppuccin-inspired design
 - **✅ Estimation Session Management** - Complete voting workflow with phases, vote hiding, and result calculations
+- **✅ Ticket-Centric Workflow** - Streamlined ticket ID-based task management with conditional Jira linking
+- **✅ Per-Room Jira Integration** - Host-configurable Jira base URLs with automatic link generation
 
 **🎯 NEXT: Local Username Caching or React Router Integration** - User experience improvements
 
@@ -21,27 +23,35 @@ The application currently supports:
 ~~**Current Issue**: Users can only estimate one implicit task - there's no way to define what they're estimating.~~
 
 **✅ Completed Features:**
-- **✅ Task Creation**: Hosts can create and manage a list of user stories/tasks
-- **✅ Task Details**: Each task includes:
-  - Title (required)
-  - Description (optional)
-  - Jira link (optional)
+- **✅ Ticket Creation**: Any user can create and manage tickets (not just hosts)
+- **✅ Ticket Details**: Each ticket includes:
+  - Ticket ID (required, e.g., PROJ-123)
+  - Description (optional, used for context/details)
   - Status (pending, in_progress, completed)
   - Final estimate (set after voting)
-- **✅ Task Navigation**: 
-  - Current task indicator with highlighted styling
-  - Task selection via play button
-  - Task list sidebar with Font Awesome icons
-- **✅ Task States**: 
+- **✅ Ticket Navigation**: 
+  - Current ticket indicator with highlighted styling
+  - Ticket selection via play button
+  - Ticket list sidebar with Font Awesome icons
+  - Newest tickets appear at top of list
+- **✅ Ticket States**: 
   - Pending (⏰ clock icon)
   - In Progress (🔄 spinning icon)
   - Completed (✅ check circle icon)
+- **✅ Per-Room Jira Integration**:
+  - Host-only configurable Jira base URL settings
+  - Conditional linking (no links until URL is set)
+  - Automatic URL normalization (trailing slash)
+  - Auto-focus and text selection in settings
+  - Ticket IDs become clickable links when Jira URL configured
 
 **✅ Implementation Completed:**
-- ✅ Extended Room interface to include tasks array
-- ✅ Added TaskList.tsx component with full CRUD UI
-- ✅ Added socket events: createTask, updateTask, deleteTask, setCurrentTask
-- ✅ Implemented task state management in RoomManager
+- ✅ Extended Room interface to include tickets array and jiraBaseUrl
+- ✅ Added TaskList.tsx component with streamlined ticket-focused UI
+- ✅ Added socket events: createTask, updateTask, deleteTask, setCurrentTask, updateJiraBaseUrl
+- ✅ Implemented ticket state management in RoomManager with per-room Jira settings
+- ✅ Simplified data model (removed title field, ticket ID is primary identifier)
+- ✅ Enhanced UI with always-visible host controls and consistent button sizing
 
 ### 2. Local Username Caching
 **Priority: High**
