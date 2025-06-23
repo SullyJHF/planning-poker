@@ -4,6 +4,7 @@ import { faCrown, faLink } from '@fortawesome/free-solid-svg-icons';
 import { useSocket } from '../contexts/SocketContext';
 import { CardDeck, CardValue } from './CardDeck';
 import { TaskList, Task } from './TaskList';
+import { SessionControls } from './SessionControls';
 import './RoomView.css';
 
 interface User {
@@ -16,6 +17,16 @@ interface Vote {
     username: string;
 }
 
+type SessionPhase = 'idle' | 'voting' | 'revealed';
+
+interface EstimationResult {
+    average: number;
+    median: number;
+    mode: string[];
+    hasConsensus: boolean;
+    finalEstimate?: string;
+}
+
 export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> = ({ username, onLeaveRoom }) => {
     const { socket, roomId } = useSocket();
     const [selectedCard, setSelectedCard] = useState<CardValue>();
@@ -26,6 +37,8 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
     const [tasks, setTasks] = useState<Task[]>([]);
     const [currentTaskId, setCurrentTaskId] = useState<string>();
     const [currentTask, setCurrentTask] = useState<Task | null>(null);
+    const [sessionPhase, setSessionPhase] = useState<SessionPhase>('idle');
+    const [estimationResult, setEstimationResult] = useState<EstimationResult>();
 
     useEffect(() => {
         if (!socket) return;
@@ -54,11 +67,37 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
             setCurrentTask(data.currentTaskId ? data.tasks.find(t => t.id === data.currentTaskId) || null : null);
         });
 
+        socket.on('sessionStateUpdated', (sessionState: { phase: SessionPhase; estimationResult?: EstimationResult }) => {
+            const previousPhase = sessionPhase;
+            setSessionPhase(sessionState.phase);
+            setEstimationResult(sessionState.estimationResult);
+            
+            // Reset selected card when:
+            // 1. Transitioning away from voting phase (reveal or reset)
+            // 2. Starting new voting (clean slate)
+            // 3. Going to idle phase (reset button pressed)
+            if (previousPhase === 'voting' && sessionState.phase !== 'voting') {
+                setSelectedCard(undefined);
+            }
+            if (sessionState.phase === 'voting' && previousPhase !== 'voting') {
+                setSelectedCard(undefined);
+            }
+            if (sessionState.phase === 'idle') {
+                setSelectedCard(undefined);
+            }
+        });
+
+        socket.on('estimationResult', (result: EstimationResult) => {
+            setEstimationResult(result);
+        });
+
         return () => {
             socket.off('roomState');
             socket.off('votesUpdated');
             socket.off('hostChanged');
             socket.off('tasksUpdated');
+            socket.off('sessionStateUpdated');
+            socket.off('estimationResult');
         };
     }, [socket]);
 
@@ -96,6 +135,32 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
     const handleSetCurrentTask = (taskId: string) => {
         if (socket && roomId && isHost) {
             socket.emit('setCurrentTask', { roomId, taskId });
+            setSelectedCard(undefined);
+        }
+    };
+
+    const handleStartVoting = () => {
+        if (socket && roomId && isHost) {
+            socket.emit('startVoting', { roomId });
+        }
+    };
+
+    const handleRevealVotes = () => {
+        if (socket && roomId && isHost) {
+            socket.emit('revealVotes', { roomId });
+        }
+    };
+
+    const handleResetVoting = () => {
+        if (socket && roomId && isHost) {
+            socket.emit('resetVoting', { roomId });
+            setSelectedCard(undefined);
+        }
+    };
+
+    const handleFinalizeEstimate = (estimate: string) => {
+        if (socket && roomId && isHost) {
+            socket.emit('finalizeEstimate', { roomId, estimate });
             setSelectedCard(undefined);
         }
     };
@@ -149,8 +214,29 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
                             )}
                         </div>
                     )}
+
+                    <SessionControls 
+                        sessionPhase={sessionPhase}
+                        estimationResult={estimationResult}
+                        currentTask={currentTask ? {
+                            id: currentTask.id,
+                            title: currentTask.title,
+                            description: currentTask.description
+                        } : undefined}
+                        isHost={isHost}
+                        voteCount={Object.keys(votes).length}
+                        userCount={users.length}
+                        onStartVoting={handleStartVoting}
+                        onRevealVotes={handleRevealVotes}
+                        onResetVoting={handleResetVoting}
+                        onFinalizeEstimate={handleFinalizeEstimate}
+                    />
                     
-                    <CardDeck onSelectCard={handleSelectCard} selectedCard={selectedCard} />
+                    <CardDeck 
+                        onSelectCard={handleSelectCard} 
+                        selectedCard={selectedCard}
+                        disabled={sessionPhase !== 'voting'}
+                    />
                     
                     <div className="votes">
                         <h3>Votes ({Object.keys(votes).length}/{users.length})</h3>

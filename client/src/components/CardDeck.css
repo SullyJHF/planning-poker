@@ -11,6 +11,14 @@
     perspective: 1000px;
 }
 
+.card-deck:has(.card-hover-area:disabled) {
+    opacity: 0.5;
+}
+
+.card-hover-area:disabled {
+    cursor: not-allowed;
+}
+
 .card-container {
     position: relative;
     margin: 0 -20px;

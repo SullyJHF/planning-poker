@@ -1,0 +1,252 @@
+.session-controls {
+    background: #1e1e2e;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #313244;
+}
+
+.session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #313244;
+}
+
+.session-header h3 {
+    margin: 0;
+    color: #cdd6f4;
+    font-size: 1.1rem;
+}
+
+.session-phase {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.phase-idle {
+    background: rgba(166, 173, 200, 0.2);
+    color: #a6adc8;
+}
+
+.phase-voting {
+    background: rgba(137, 180, 250, 0.2);
+    color: #89b4fa;
+}
+
+.phase-revealed {
+    background: rgba(166, 227, 161, 0.2);
+    color: #a6e3a1;
+}
+
+.session-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6c7086;
+    font-style: italic;
+    padding: 20px;
+    text-align: center;
+    justify-content: center;
+}
+
+.session-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.session-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.start-voting-btn {
+    background: #89b4fa;
+    color: white;
+}
+
+.start-voting-btn:hover {
+    background: #74c7ec;
+    transform: translateY(-1px);
+}
+
+.reveal-btn {
+    background: #a6e3a1;
+    color: #1e1e2e;
+}
+
+.reveal-btn:hover {
+    background: #94d3a2;
+    transform: translateY(-1px);
+}
+
+.reset-btn {
+    background: #f38ba8;
+    color: white;
+}
+
+.reset-btn:hover {
+    background: #eba0ac;
+    transform: translateY(-1px);
+}
+
+.session-status {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.voting-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #89b4fa;
+    font-weight: 500;
+}
+
+.estimation-results {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.results-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    padding: 16px;
+    background: #313244;
+    border-radius: 8px;
+}
+
+.result-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+}
+
+.result-stat .label {
+    font-size: 12px;
+    color: #a6adc8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.result-stat .value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #cdd6f4;
+}
+
+.consensus-indicator {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #a6e3a1;
+    font-weight: 600;
+    padding: 8px;
+    background: rgba(166, 227, 161, 0.1);
+    border-radius: 6px;
+}
+
+.finalize-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.finalize-section h4 {
+    margin: 0;
+    color: #cdd6f4;
+    font-size: 1rem;
+}
+
+.estimate-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.estimate-option {
+    padding: 8px 16px;
+    background: #45475a;
+    color: #cdd6f4;
+    border: 1px solid #585b70;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.estimate-option:hover {
+    background: #585b70;
+    border-color: #6c7086;
+    transform: translateY(-1px);
+}
+
+.custom-estimate {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.custom-estimate input {
+    flex: 1;
+    padding: 8px 12px;
+    background: #45475a;
+    border: 1px solid #585b70;
+    border-radius: 6px;
+    color: #cdd6f4;
+    font-size: 14px;
+}
+
+.custom-estimate input:focus {
+    outline: none;
+    border-color: #89b4fa;
+    box-shadow: 0 0 0 2px rgba(137, 180, 250, 0.2);
+}
+
+.custom-estimate input::placeholder {
+    color: #6c7086;
+}
+
+.finalize-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #a6e3a1;
+    color: #1e1e2e;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.finalize-btn:hover:not(:disabled) {
+    background: #94d3a2;
+    transform: translateY(-1px);
+}
+
+.finalize-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

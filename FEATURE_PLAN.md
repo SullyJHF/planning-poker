@@ -10,8 +10,9 @@ The application currently supports:
 - **✅ Task/Story Management System** - Complete with CRUD operations, status tracking, and Jira integration
 - **✅ Font Awesome Icon System** - Consistent iconography throughout the application
 - **✅ Dark Theme UI** - Modern three-column layout with Catppuccin-inspired design
+- **✅ Estimation Session Management** - Complete voting workflow with phases, vote hiding, and result calculations
 
-**🎯 NEXT: Estimation Session Management** - Adding proper voting rounds, vote hiding/revealing, and session workflow
+**🎯 NEXT: Local Username Caching or React Router Integration** - User experience improvements
 
 ## Proposed Feature Enhancements
 
@@ -113,29 +114,33 @@ The application currently supports:
 - Update UI to clearly show host privileges
 - Add optional host transfer restrictions
 
-### 6. Estimation Session Management - NEXT PRIORITY
+### 6. ✅ Estimation Session Management - COMPLETED
 **Priority: High - IMMEDIATE NEXT FEATURE**
-**Current Issue**: No clear session workflow or voting round management.
+~~**Current Issue**: No clear session workflow or voting round management.~~
 
-**Features to Add:**
-- **Voting Rounds**: 
-  - Clear distinction between voting and reveal phases
-  - Host can start/end voting rounds
-  - Hide votes until reveal phase
-- **Estimation Results**:
+**✅ Completed Features:**
+- **✅ Voting Rounds**: 
+  - Clear distinction between voting and reveal phases (idle/voting/revealed)
+  - Host can start/end voting rounds with dedicated controls
+  - Hide votes until reveal phase (shows *** during voting)
+- **✅ Estimation Results**:
   - Average, median, and mode calculations
-  - Consensus detection (all votes within acceptable range)
-  - Final estimate assignment to tasks
-- **Session Control**:
-  - Start/pause/reset voting sessions
+  - Consensus detection (identical votes or within 1 point)
+  - Final estimate assignment to tasks with quick-select options
+- **✅ Session Control**:
+  - Start/reset voting sessions with proper state management
   - Clear votes button for re-voting
-  - Timer for voting rounds (optional)
+  - Finalization workflow with custom estimates
+- **✅ Card Integration**:
+  - Cards disabled outside voting phase
+  - Selected cards reset on phase transitions for all users
 
-**Implementation Plan:**
-- Add session state management (voting/reveal/completed phases)
-- Implement vote hiding/revealing logic
-- Add estimation calculation utilities
-- Create session control UI components
+**✅ Implementation Completed:**
+- ✅ Added session state management with three phases (idle/voting/revealed)
+- ✅ Implemented vote hiding/revealing logic in backend
+- ✅ Added comprehensive estimation calculation utilities
+- ✅ Created SessionControls component with full UI workflow
+- ✅ Integrated with existing task management system
 
 ### 7. Enhanced Voting System
 **Priority: Medium**
@@ -254,10 +259,10 @@ The application currently supports:
 
 ## Implementation Priority Order
 
-### Phase 1: Core Functionality Completion (2-3 weeks)
+### Phase 1: Core Functionality Completion (2-3 weeks) - ✅ COMPLETED
 1. **✅ Task/Story Management System** - COMPLETED
-2. **Estimation Session Management** - NEXT PRIORITY
-3. Enhanced Voting System (basic features)
+2. **✅ Estimation Session Management** - COMPLETED  
+3. Enhanced Voting System (basic features) - MOVED TO PHASE 3
 
 ### Phase 2: User Experience Improvements (2-3 weeks)
 1. Local Username Caching

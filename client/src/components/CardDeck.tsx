@@ -7,9 +7,10 @@ const CARD_VALUES: CardValue[] = ['0', '1', '2', '3', '5', '8', '13', '?', '∞'
 interface CardDeckProps {
     onSelectCard: (value: CardValue) => void;
     selectedCard?: CardValue;
+    disabled?: boolean;
 }
 
-export const CardDeck: React.FC<CardDeckProps> = ({ onSelectCard, selectedCard }) => {
+export const CardDeck: React.FC<CardDeckProps> = ({ onSelectCard, selectedCard, disabled = false }) => {
     return (
         <div className="card-deck">
             {CARD_VALUES.map((value, index) => (
@@ -25,7 +26,8 @@ export const CardDeck: React.FC<CardDeckProps> = ({ onSelectCard, selectedCard }
                             const card = e.currentTarget.nextElementSibling;
                             if (card) card.classList.remove('hover');
                         }}
-                        onClick={() => onSelectCard(value)}
+                        onClick={() => !disabled && onSelectCard(value)}
+                        disabled={disabled}
                     />
                     <div
                         className={`card ${selectedCard === value ? 'selected' : ''}`}

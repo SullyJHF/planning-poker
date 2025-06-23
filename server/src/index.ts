@@ -76,7 +76,16 @@ io.on('connection', (socket) => {
                 const hostId = roomManager.getHostId(data.roomId);
                 const tasks = roomManager.getTasks(data.roomId);
                 const currentTask = roomManager.getCurrentTask(data.roomId);
+                const sessionState = roomManager.getSessionState(data.roomId);
+                
                 io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id });
+                
+                // Send current votes and session state to the new user
+                const votes = roomManager.getRoomVotes(data.roomId);
+                socket.emit('votesUpdated', votes);
+                if (sessionState) {
+                    socket.emit('sessionStateUpdated', sessionState);
+                }
 
                 // Broadcast updated room list
                 broadcastRoomList();
@@ -173,10 +182,58 @@ io.on('connection', (socket) => {
         if (roomManager.setCurrentTask(roomId, socket.id, taskId)) {
             const tasks = roomManager.getTasks(roomId);
             const currentTask = roomManager.getCurrentTask(roomId);
+            const sessionState = roomManager.getSessionState(roomId);
             
             // Clear existing votes and notify clients
             io.to(roomId).emit('votesUpdated', {});
             io.to(roomId).emit('tasksUpdated', { tasks, currentTaskId: currentTask?.id });
+            if (sessionState) {
+                io.to(roomId).emit('sessionStateUpdated', sessionState);
+            }
+        }
+    });
+
+    // Session Management Events
+    socket.on('startVoting', ({ roomId }) => {
+        if (roomManager.startVoting(roomId, socket.id)) {
+            const sessionState = roomManager.getSessionState(roomId);
+            const votes = roomManager.getRoomVotes(roomId);
+            
+            io.to(roomId).emit('sessionStateUpdated', sessionState);
+            io.to(roomId).emit('votesUpdated', votes); // This will show hidden votes
+        }
+    });
+
+    socket.on('revealVotes', ({ roomId }) => {
+        const estimationResult = roomManager.revealVotes(roomId, socket.id);
+        if (estimationResult) {
+            const sessionState = roomManager.getSessionState(roomId);
+            const votes = roomManager.getRoomVotes(roomId);
+            
+            io.to(roomId).emit('sessionStateUpdated', sessionState);
+            io.to(roomId).emit('votesUpdated', votes); // This will show actual votes
+            io.to(roomId).emit('estimationResult', estimationResult);
+        }
+    });
+
+    socket.on('resetVoting', ({ roomId }) => {
+        if (roomManager.resetVoting(roomId, socket.id)) {
+            const sessionState = roomManager.getSessionState(roomId);
+            
+            io.to(roomId).emit('sessionStateUpdated', sessionState);
+            io.to(roomId).emit('votesUpdated', {});
+        }
+    });
+
+    socket.on('finalizeEstimate', ({ roomId, estimate }) => {
+        if (roomManager.finalizeEstimate(roomId, socket.id, estimate)) {
+            const tasks = roomManager.getTasks(roomId);
+            const currentTask = roomManager.getCurrentTask(roomId);
+            const sessionState = roomManager.getSessionState(roomId);
+            
+            io.to(roomId).emit('tasksUpdated', { tasks, currentTaskId: currentTask?.id });
+            io.to(roomId).emit('sessionStateUpdated', sessionState);
+            io.to(roomId).emit('votesUpdated', {});
         }
     });
 

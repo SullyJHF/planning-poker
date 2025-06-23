@@ -9,8 +9,7 @@ import {
     faClock,
     faSpinner,
     faCheckCircle,
-    faQuestionCircle,
-    faCrown
+    faQuestionCircle
 } from '@fortawesome/free-solid-svg-icons';
 import './TaskList.css';
 

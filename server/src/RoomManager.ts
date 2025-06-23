@@ -13,6 +13,16 @@ interface Task {
     createdAt: Date;
 }
 
+type SessionPhase = 'idle' | 'voting' | 'revealed';
+
+interface EstimationResult {
+    average: number;
+    median: number;
+    mode: string[];
+    hasConsensus: boolean;
+    finalEstimate?: string;
+}
+
 interface Room {
     id: string;
     votes: Record<string, string>;
@@ -20,6 +30,8 @@ interface Room {
     hostId: string;
     tasks: Task[];
     currentTaskId?: string;
+    sessionPhase: SessionPhase;
+    estimationResult?: EstimationResult;
 }
 
 interface RoomInfo {
@@ -46,7 +58,9 @@ export class RoomManager {
             users: new Map([[hostId, { id: hostId, username: hostUsername }]]),
             hostId,
             tasks: [],
-            currentTaskId: undefined
+            currentTaskId: undefined,
+            sessionPhase: 'idle',
+            estimationResult: undefined
         });
     }
 
@@ -107,6 +121,22 @@ export class RoomManager {
         const room = this.rooms.get(roomId);
         if (!room) return {};
 
+        // During voting phase, hide vote values but show who has voted
+        if (room.sessionPhase === 'voting') {
+            const hiddenVotes: Record<string, { value: string; username: string; }> = {};
+            Object.keys(room.votes).forEach(userId => {
+                const user = room.users.get(userId);
+                if (user) {
+                    hiddenVotes[userId] = {
+                        value: '***', // Hidden vote indicator
+                        username: user.username
+                    };
+                }
+            });
+            return hiddenVotes;
+        }
+
+        // During revealed phase or idle, show actual votes
         const votesWithUsernames: Record<string, { value: string; username: string; }> = {};
         Object.entries(room.votes).forEach(([userId, value]) => {
             const user = room.users.get(userId);
@@ -259,6 +289,8 @@ export class RoomManager {
         room.currentTaskId = taskId;
         task.status = 'in_progress';
         room.votes = {};
+        room.sessionPhase = 'idle';
+        room.estimationResult = undefined;
 
         return true;
     }
@@ -275,5 +307,118 @@ export class RoomManager {
         }
 
         return room.tasks.find(task => task.id === room.currentTaskId) || null;
+    }
+
+    // Session Management Methods
+
+    startVoting(roomId: string, hostId: string): boolean {
+        const room = this.rooms.get(roomId);
+        if (!room || room.hostId !== hostId || !room.currentTaskId) {
+            return false;
+        }
+
+        room.sessionPhase = 'voting';
+        room.votes = {}; // Clear previous votes
+        room.estimationResult = undefined;
+        return true;
+    }
+
+    revealVotes(roomId: string, hostId: string): EstimationResult | null {
+        const room = this.rooms.get(roomId);
+        if (!room || room.hostId !== hostId || room.sessionPhase !== 'voting') {
+            return null;
+        }
+
+        room.sessionPhase = 'revealed';
+        const result = this.calculateEstimationResult(room.votes);
+        room.estimationResult = result;
+        return result;
+    }
+
+    resetVoting(roomId: string, hostId: string): boolean {
+        const room = this.rooms.get(roomId);
+        if (!room || room.hostId !== hostId) {
+            return false;
+        }
+
+        room.sessionPhase = 'idle';
+        room.votes = {};
+        room.estimationResult = undefined;
+        return true;
+    }
+
+    finalizeEstimate(roomId: string, hostId: string, estimate: string): boolean {
+        const room = this.rooms.get(roomId);
+        if (!room || room.hostId !== hostId || !room.currentTaskId) {
+            return false;
+        }
+
+        const currentTask = room.tasks.find(task => task.id === room.currentTaskId);
+        if (!currentTask) {
+            return false;
+        }
+
+        currentTask.finalEstimate = estimate;
+        currentTask.status = 'completed';
+        room.sessionPhase = 'idle';
+        room.currentTaskId = undefined;
+        room.votes = {};
+        room.estimationResult = undefined;
+
+        return true;
+    }
+
+    getSessionState(roomId: string): { phase: SessionPhase; estimationResult?: EstimationResult } | null {
+        const room = this.rooms.get(roomId);
+        if (!room) return null;
+
+        return {
+            phase: room.sessionPhase,
+            estimationResult: room.estimationResult
+        };
+    }
+
+    private calculateEstimationResult(votes: Record<string, string>): EstimationResult {
+        const voteValues = Object.values(votes);
+        
+        // Filter out non-numeric votes (like ?, ∞)
+        const numericVotes = voteValues
+            .filter(vote => !isNaN(Number(vote)) && vote !== '?' && vote !== '∞')
+            .map(vote => Number(vote));
+
+        // Calculate average
+        const average = numericVotes.length > 0 
+            ? numericVotes.reduce((sum, vote) => sum + vote, 0) / numericVotes.length 
+            : 0;
+
+        // Calculate median
+        const sortedVotes = [...numericVotes].sort((a, b) => a - b);
+        const median = sortedVotes.length > 0
+            ? sortedVotes.length % 2 === 0
+                ? (sortedVotes[sortedVotes.length / 2 - 1] + sortedVotes[sortedVotes.length / 2]) / 2
+                : sortedVotes[Math.floor(sortedVotes.length / 2)]
+            : 0;
+
+        // Calculate mode (most frequent values)
+        const voteFrequency: Record<string, number> = {};
+        voteValues.forEach(vote => {
+            voteFrequency[vote] = (voteFrequency[vote] || 0) + 1;
+        });
+
+        const maxFrequency = Math.max(...Object.values(voteFrequency));
+        const mode = Object.keys(voteFrequency).filter(vote => voteFrequency[vote] === maxFrequency);
+
+        // Check for consensus (all votes are the same or within 1 point for Fibonacci)
+        const hasConsensus = voteValues.length > 1 && (
+            new Set(voteValues).size === 1 || // All votes identical
+            (numericVotes.length === voteValues.length && Math.max(...numericVotes) - Math.min(...numericVotes) <= 1)
+        );
+
+        return {
+            average: Math.round(average * 100) / 100, // Round to 2 decimal places
+            median,
+            mode,
+            hasConsensus
+        };
     }
 } 
