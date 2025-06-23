@@ -217,9 +217,9 @@ export class RoomManager {
         return room ? room.hostId : null;
     }
 
-    createTask(roomId: string, hostId: string, task: Omit<Task, 'id' | 'createdAt'>): Task | null {
+    createTask(roomId: string, userId: string, task: Omit<Task, 'id' | 'createdAt'>): Task | null {
         const room = this.rooms.get(roomId);
-        if (!room || room.hostId !== hostId) {
+        if (!room || !room.users.has(userId)) {
             return null;
         }
 

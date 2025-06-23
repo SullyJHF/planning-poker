@@ -115,7 +115,7 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
     };
 
     const handleCreateTask = (task: Omit<Task, 'id' | 'createdAt'>) => {
-        if (socket && roomId && isHost) {
+        if (socket && roomId) {
             socket.emit('createTask', { roomId, task });
         }
     };

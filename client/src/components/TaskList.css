@@ -156,6 +156,24 @@
     min-width: 20px;
 }
 
+/* Status icon colors */
+.task-status .fa-clock {
+    color: #f9e2af; /* Yellow for pending */
+}
+
+.task-status .fa-spinner {
+    color: #89b4fa; /* Blue for in progress */
+}
+
+.task-status .fa-check-circle,
+.task-status .fa-circle-check {
+    color: #a6e3a1; /* Green for completed */
+}
+
+.task-status .fa-question-circle {
+    color: #6c7086; /* Gray for unknown */
+}
+
 .task-title {
     flex: 1;
     color: #cdd6f4;
@@ -184,6 +202,19 @@
     border-radius: 4px;
     font-size: 12px;
     transition: all 0.2s ease;
+}
+
+/* Task action button colors */
+.select-task-btn {
+    color: #a6e3a1; /* Green for play */
+}
+
+.edit-task-btn {
+    color: #f9e2af; /* Yellow for edit */
+}
+
+.delete-task-btn {
+    color: #f38ba8; /* Red for delete */
 }
 
 .select-task-btn:hover {

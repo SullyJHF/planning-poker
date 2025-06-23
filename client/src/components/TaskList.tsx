@@ -111,7 +111,7 @@ export const TaskList: React.FC<TaskListProps> = ({
         <div className="task-list">
             <div className="task-list-header">
                 <h3>Tasks</h3>
-                {isHost && !showForm && (
+                {!showForm && (
                     <button 
                         className="add-task-btn"
                         onClick={() => setShowForm(true)}
@@ -122,7 +122,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                 )}
             </div>
 
-            {showForm && isHost && (
+            {showForm && (
                 <form className="task-form" onSubmit={handleSubmit}>
                     <input
                         type="text"
