@@ -1,66 +1,117 @@
 .room-list {
     margin: 1rem 0;
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 1rem;
-    border-radius: 8px;
-    min-width: 300px;
+    background: #1e1e2e;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid #313244;
+    min-width: 400px;
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
-.room-list.empty {
+.rooms-container {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-top: 1px;
+}
+
+.no-rooms {
     text-align: center;
-    color: #888;
+    color: #6c7086;
+    font-style: italic;
+    padding: 40px 20px;
 }
 
-.room-list h3 {
-    margin-top: 0;
-    margin-bottom: 1rem;
+.room-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding: 4px 4px 12px 0;
+    border-bottom: 1px solid #313244;
+    min-height: 44px;
+    flex-shrink: 0;
+}
+
+.room-list-header h3 {
+    margin: 0;
+    color: #cdd6f4;
+    font-size: 1.2rem;
+}
+
+.create-room-btn {
+    background: #89b4fa;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.create-room-btn:hover {
+    background: #74c7ec;
+    transform: scale(1.1);
 }
 
 .rooms {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 8px;
+    padding-top: 1px;
 }
 
 .room-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem;
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    color: white;
+    padding: 16px;
+    background: #f2f2f2;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    color: #2d2d2d;
     cursor: pointer;
     transition: all 0.2s ease;
+    margin: 1px 0 0 0;
 }
 
 .room-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: #61dafb;
+    background: #e8e8e8;
+    border-color: #b0b0b0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .room-info {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.25rem;
+    gap: 4px;
 }
 
 .room-id {
-    font-size: 0.8rem;
+    font-size: 12px;
+    color: #666;
 }
 
 .host {
-    font-size: 1rem;
-    font-weight: bold;
-    color: #2a2a2a;
-    text-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
 }
 
 .user-count {
-    font-size: 0.9rem;
-    color: #2a2a2a;
+    font-size: 14px;
+    color: #0066cc;
     white-space: nowrap;
-    text-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
+    font-weight: 600;
 } 

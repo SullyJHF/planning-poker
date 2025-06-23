@@ -40,8 +40,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({ username }) => {
 
     return (
         <div className="lobby-view">
-            <button onClick={handleCreateRoom}>Create New Room</button>
-            <RoomList rooms={activeRooms} onJoinRoom={handleJoinRoom} />
+            <RoomList rooms={activeRooms} onJoinRoom={handleJoinRoom} onCreateRoom={handleCreateRoom} />
         </div>
     );
 }; 
