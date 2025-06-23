@@ -247,6 +247,11 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('checkRoomExists', ({ roomId }, callback) => {
+        const exists = roomManager.roomExists(roomId);
+        callback(exists);
+    });
+
     socket.on('disconnect', () => {
         console.log('Client disconnected:', socket.id);
         // Remove user from all rooms and clean up votes

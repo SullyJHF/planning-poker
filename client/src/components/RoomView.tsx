@@ -108,7 +108,7 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
             socket.off('estimationResult');
             socket.off('jiraBaseUrlUpdated');
         };
-    }, [socket]);
+    }, [socket, sessionPhase]);
 
     const handleSelectCard = (value: CardValue) => {
         if (socket && roomId) {

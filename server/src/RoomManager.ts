@@ -394,6 +394,10 @@ export class RoomManager {
         return room ? room.jiraBaseUrl : null;
     }
 
+    roomExists(roomId: string): boolean {
+        return this.rooms.has(roomId);
+    }
+
     private calculateEstimationResult(votes: Record<string, string>): EstimationResult {
         const voteValues = Object.values(votes);
         

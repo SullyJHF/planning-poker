@@ -1,74 +1,26 @@
-import React, { useState } from 'react';
-import { SocketProvider, useSocket } from './contexts/SocketContext';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { SocketProvider } from './contexts/SocketContext';
+import { UsernameProvider, useUsername } from './contexts/UsernameContext';
 import { UsernameInput } from './components/UsernameInput';
-import { ConnectionStatus } from './components/ConnectionStatus';
-import { RoomView } from './components/RoomView';
-import { LobbyView } from './components/LobbyView';
+import { LobbyRoute } from './components/routes/LobbyRoute';
+import { RoomRoute } from './components/routes/RoomRoute';
 import './App.css';
 
 function AppContent() {
-    const { socket, roomId, setRoomId } = useSocket();
-    const [username, setUsername] = useState<string>('');
-    const [showUsernameInput, setShowUsernameInput] = useState(true);
+    const { setUsername, showUsernameInput, setShowUsernameInput } = useUsername();
 
     const handleUsernameSubmit = (newUsername: string) => {
         setUsername(newUsername);
         setShowUsernameInput(false);
     };
 
-    const handleLeaveRoom = () => {
-        if (socket && roomId) {
-            socket.emit('leaveRoom', { roomId });
-            setRoomId(null);
-        }
-    };
-
     return (
-        <div className="App">
-            {roomId && !showUsernameInput && (
-                <header className="App-header">
-                    <div className="header-left">
-                        <h1>Planning Poker</h1>
-                        <ConnectionStatus />
-                    </div>
-                    <div className="header-center">
-                        <div className="username-display">
-                            <span className="username-label">Username:</span>
-                            <span className="username-value">{username}</span>
-                            <button className="change-username-btn" onClick={() => setShowUsernameInput(true)}>
-                                Change
-                            </button>
-                        </div>
-                    </div>
-                    <div className="header-right">
-                        <span className="room-id">Room ID: {roomId}</span>
-                        <button className="leave-room-btn" onClick={handleLeaveRoom}>
-                            Leave Room
-                        </button>
-                    </div>
-                </header>
-            )}
-
-            <main className="App-content">
-                {!roomId ? (
-                    <div className="lobby-container">
-                        <div className="lobby-header">
-                            <div className="lobby-title-row">
-                                <h1>Planning Poker</h1>
-                                <ConnectionStatus />
-                            </div>
-                            {!showUsernameInput && (
-                                <p>Username: {username} <button onClick={() => setShowUsernameInput(true)}>Change</button></p>
-                            )}
-                        </div>
-                        <div className="lobby-content">
-                            <LobbyView username={username} />
-                        </div>
-                    </div>
-                ) : (
-                    <RoomView username={username} onLeaveRoom={handleLeaveRoom} />
-                )}
-            </main>
+        <>
+            <Routes>
+                <Route path="/" element={<LobbyRoute />} />
+                <Route path="/room/:roomId" element={<RoomRoute />} />
+            </Routes>
 
             {showUsernameInput && (
                 <div className="username-overlay">
@@ -78,15 +30,18 @@ function AppContent() {
                     </div>
                 </div>
             )}
-
-        </div>
+        </>
     );
 }
 
 function App() {
     return (
         <SocketProvider>
-            <AppContent />
+            <UsernameProvider>
+                <Router>
+                    <AppContent />
+                </Router>
+            </UsernameProvider>
         </SocketProvider>
     );
 }

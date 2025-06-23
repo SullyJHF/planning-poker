@@ -5,7 +5,6 @@ import {
     faEdit, 
     faTrashAlt, 
     faPlay, 
-    faLink,
     faClock,
     faSpinner,
     faCheckCircle,

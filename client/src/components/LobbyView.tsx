@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSocket } from '../contexts/SocketContext';
 import { Room, RoomList } from './RoomList';
 import './LobbyView.css';
@@ -8,7 +9,8 @@ interface LobbyViewProps {
 }
 
 export const LobbyView: React.FC<LobbyViewProps> = ({ username }) => {
-    const { socket, setRoomId } = useSocket();
+    const { socket } = useSocket();
+    const navigate = useNavigate();
     const [activeRooms, setActiveRooms] = useState<Room[]>([]);
 
     useEffect(() => {
@@ -24,18 +26,15 @@ export const LobbyView: React.FC<LobbyViewProps> = ({ username }) => {
     }, [socket]);
 
     const handleCreateRoom = () => {
-        if (socket) {
+        if (socket && username) {
             const newRoomId = Math.random().toString(36).substring(2, 8);
             socket.emit('createRoom', { roomId: newRoomId, username });
-            setRoomId(newRoomId);
+            navigate(`/room/${newRoomId}`);
         }
     };
 
     const handleJoinRoom = (roomId: string) => {
-        if (socket) {
-            socket.emit('joinRoom', { roomId, username });
-            setRoomId(roomId);
-        }
+        navigate(`/room/${roomId}`);
     };
 
     return (
