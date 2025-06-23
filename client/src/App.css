@@ -1,157 +1,109 @@
 .App {
-  text-align: center;
-  min-height: 100vh;
+  height: 100vh;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-  padding: 2rem;
-}
-
-.connection-status {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #888;
-}
-
-.connection-status i {
-  font-size: 1rem;
-}
-
-.connection-status.connected {
-  color: #4caf50;
-}
-
-.connection-status.disconnected {
-  color: #f44336;
-}
-
-.room-controls {
-  margin: 2rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: center;
-}
-
-.room-controls button {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  background-color: #61dafb;
-  border: none;
-  border-radius: 4px;
-  color: #282c34;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.room-controls button:hover {
-  background-color: #4fa8c7;
-}
-
-.join-room input {
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: 2px solid #61dafb;
-  border-radius: 4px;
-  background-color: #282c34;
-  color: white;
-  width: 200px;
-}
-
-.join-room input:focus {
-  outline: none;
-  border-color: #4fa8c7;
-}
-
-.users-list {
-  margin: 1rem 0;
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 1rem;
-  border-radius: 8px;
-  min-width: 200px;
-}
-
-.user {
-  padding: 0.5rem;
-  margin: 0.5rem 0;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  background: #1e1e2e;
+  border-bottom: 1px solid #313244;
+  padding: 12px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  height: 60px;
+  flex-shrink: 0;
+  z-index: 100;
 }
 
-.host-badge {
-  color: #ffd700;
-  margin-left: 0.5rem;
-  font-size: 1.1rem;
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+.App-content {
+  flex: 1;
+  background-color: #282c34;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.transfer-host-btn {
-  background: none;
-  border: none;
-  color: #888;
-  cursor: pointer;
-  padding: 0.25rem;
-  transition: color 0.2s;
-  font-size: 1.1rem;
-}
-
-.transfer-host-btn:hover {
-  color: #ffd700;
-}
-
-.votes {
-  margin-top: 2rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 1rem;
-  border-radius: 8px;
-  min-width: 200px;
-}
-
-.vote {
-  padding: 0.5rem;
-  margin: 0.5rem 0;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-}
-
-/* Username display and change button */
-.App-header p {
+.header-left {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 16px;
 }
 
-.App-header p button {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8rem;
-  background-color: #61dafb;
+.header-left h1 {
+  margin: 0;
+  color: #cdd6f4;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.header-center {
+  display: flex;
+  align-items: center;
+}
+
+.username-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.username-label {
+  color: #a6adc8;
+  font-size: 14px;
+}
+
+.username-value {
+  color: #cdd6f4;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.change-username-btn {
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #89b4fa;
+  color: white;
   border: none;
   border-radius: 4px;
-  color: #282c34;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
-.App-header p button:hover {
-  background-color: #4fa8c7;
+.change-username-btn:hover {
+  background: #74c7ec;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-right .room-id {
+  color: #a6adc8;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.header-right .leave-room-btn {
+  padding: 6px 12px;
+  font-size: 14px;
+  background: #f38ba8;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: auto;
+}
+
+.header-right .leave-room-btn:hover {
+  background: #eba0ac;
 }
 
 .username-overlay {
@@ -181,4 +133,61 @@
   margin-bottom: 1.5rem;
   color: white;
   font-size: 1.5rem;
+}
+
+.lobby-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+}
+
+.lobby-header {
+  margin-bottom: 1rem;
+}
+
+.lobby-header h1 {
+  color: white;
+  font-size: calc(10px + 2vmin);
+  margin: 0;
+}
+
+.lobby-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  align-items: center;
+  padding: 2rem 0;
+}
+
+.lobby-content {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.lobby-header p {
+  color: #a6adc8;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  margin: 8px 0 0 0;
+  font-size: 14px;
+}
+
+.lobby-header p button {
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #89b4fa;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lobby-header p button:hover {
+  background: #74c7ec;
 } 

@@ -25,19 +25,50 @@ function AppContent() {
 
     return (
         <div className="App">
-            <header className="App-header">
-                <ConnectionStatus />
-                <h1>Planning Poker</h1>
-                {!showUsernameInput && (
-                    <p>Username: {username} <button onClick={() => setShowUsernameInput(true)}>Change</button></p>
-                )}
+            {roomId && !showUsernameInput && (
+                <header className="App-header">
+                    <div className="header-left">
+                        <h1>Planning Poker</h1>
+                        <ConnectionStatus />
+                    </div>
+                    <div className="header-center">
+                        <div className="username-display">
+                            <span className="username-label">Username:</span>
+                            <span className="username-value">{username}</span>
+                            <button className="change-username-btn" onClick={() => setShowUsernameInput(true)}>
+                                Change
+                            </button>
+                        </div>
+                    </div>
+                    <div className="header-right">
+                        <span className="room-id">Room ID: {roomId}</span>
+                        <button className="leave-room-btn" onClick={handleLeaveRoom}>
+                            Leave Room
+                        </button>
+                    </div>
+                </header>
+            )}
 
+            <main className="App-content">
                 {!roomId ? (
-                    <LobbyView username={username} />
+                    <div className="lobby-container">
+                        <div className="lobby-header">
+                            <div className="lobby-title-row">
+                                <h1>Planning Poker</h1>
+                                <ConnectionStatus />
+                            </div>
+                            {!showUsernameInput && (
+                                <p>Username: {username} <button onClick={() => setShowUsernameInput(true)}>Change</button></p>
+                            )}
+                        </div>
+                        <div className="lobby-content">
+                            <LobbyView username={username} />
+                        </div>
+                    </div>
                 ) : (
                     <RoomView username={username} onLeaveRoom={handleLeaveRoom} />
                 )}
-            </header>
+            </main>
 
             {showUsernameInput && (
                 <div className="username-overlay">
