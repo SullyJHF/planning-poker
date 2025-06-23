@@ -31,9 +31,16 @@ This is a **real-time planning poker application** built with a React frontend a
 - Uses Express + Socket.IO with CORS for real-time communication
 
 **Frontend (client/src/)**
-- `App.tsx` - Main app component with routing between lobby and room views
+- `App.tsx` - Main app component with header/lobby/room routing and layout
 - `contexts/SocketContext.tsx` - Socket.IO connection management with reconnection logic
-- `components/` - React components for different UI views (LobbyView, RoomView, etc.)
+- `components/` - React components for different UI views:
+  - `LobbyView.tsx` - Waiting room with integrated room list
+  - `RoomView.tsx` - Main planning poker interface with three-column layout
+  - `TaskList.tsx` - Task management sidebar with CRUD operations
+  - `RoomList.tsx` - Active rooms display with create/join functionality
+  - `ConnectionStatus.tsx` - Real-time connection indicator
+  - `CardDeck.tsx` - Planning poker cards for voting
+  - `UsernameInput.tsx` - Username entry modal
 
 ### Key Data Flow
 
@@ -57,6 +64,42 @@ Client requires `.env` file with:
 REACT_APP_SERVER_URL=http://localhost:3001
 ```
 
+## UI Design System
+
+### Icons
+- Uses Font Awesome icons throughout the application for consistency
+- Key icons: plus (create), edit, delete, play (select), clock (pending), spinner (in progress), check circle (completed)
+
+### Layout
+- **Room View**: Three-column grid layout (users | voting area | tasks)
+- **Lobby**: Centered layout with title, connection status, and room list
+- **Dark Theme**: Catppuccin-inspired color palette with `#1e1e2e` backgrounds and `#cdd6f4` text
+
+### Interactive Elements
+- Hover effects with `translateY(-1px)` transforms and shadows
+- Consistent button styling with blue (`#89b4fa`) primary color
+- Card-based design with rounded corners and subtle borders
+
+## Task Management Features
+
+### Task Properties
+- Title (required), description (optional), Jira link (optional)
+- Status: pending, in_progress, completed
+- Final estimate (set after voting completion)
+- Creation timestamp
+
+### Host Capabilities
+- Create, edit, and delete tasks
+- Set current task for voting
+- Update task status and final estimates
+- Transfer host privileges to other users
+
+### Task UI
+- Integrated sidebar in room view
+- Add button in header (matches room list pattern)
+- Status icons with Font Awesome
+- Hover actions for host (edit, delete, select)
+
 ## Development Notes
 
 - Monorepo structure using npm workspaces
@@ -64,3 +107,5 @@ REACT_APP_SERVER_URL=http://localhost:3001
 - Real-time state synchronization via Socket.IO room broadcasting
 - Automatic host reassignment when current host disconnects
 - Room cleanup when last user leaves
+- Font Awesome integration for consistent iconography
+- Responsive three-column layout with proper overflow handling
