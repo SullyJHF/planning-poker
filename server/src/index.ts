@@ -50,7 +50,9 @@ io.on('connection', (socket) => {
             // Send current room state
             const users = roomManager.getRoomUsers(data.roomId);
             const hostId = roomManager.getHostId(data.roomId);
-            io.to(data.roomId).emit('roomState', { users, hostId });
+            const tasks = roomManager.getTasks(data.roomId);
+            const currentTask = roomManager.getCurrentTask(data.roomId);
+            io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id });
 
             // Broadcast updated room list
             broadcastRoomList();
@@ -72,7 +74,9 @@ io.on('connection', (socket) => {
                 // Send current room state
                 const users = roomManager.getRoomUsers(data.roomId);
                 const hostId = roomManager.getHostId(data.roomId);
-                io.to(data.roomId).emit('roomState', { users, hostId });
+                const tasks = roomManager.getTasks(data.roomId);
+                const currentTask = roomManager.getCurrentTask(data.roomId);
+                io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id });
 
                 // Broadcast updated room list
                 broadcastRoomList();
@@ -92,7 +96,9 @@ io.on('connection', (socket) => {
             // Send updated room state
             const users = roomManager.getRoomUsers(data.roomId);
             const hostId = roomManager.getHostId(data.roomId);
-            io.to(data.roomId).emit('roomState', { users, hostId });
+            const tasks = roomManager.getTasks(data.roomId);
+            const currentTask = roomManager.getCurrentTask(data.roomId);
+            io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id });
 
             // Broadcast updated room list
             broadcastRoomList();
@@ -118,7 +124,9 @@ io.on('connection', (socket) => {
             if (room.length > 0) {
                 const hostId = roomManager.getHostId(roomId);
                 if (hostId) {
-                    io.to(roomId).emit('roomState', { users: room, hostId });
+                    const tasks = roomManager.getTasks(roomId);
+                    const currentTask = roomManager.getCurrentTask(roomId);
+                    io.to(roomId).emit('roomState', { users: room, hostId, tasks, currentTaskId: currentTask?.id });
                     io.to(roomId).emit('hostChanged', hostId);
                 }
             }
@@ -135,6 +143,43 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('createTask', ({ roomId, task }) => {
+        const newTask = roomManager.createTask(roomId, socket.id, task);
+        if (newTask) {
+            const tasks = roomManager.getTasks(roomId);
+            const currentTask = roomManager.getCurrentTask(roomId);
+            io.to(roomId).emit('tasksUpdated', { tasks, currentTaskId: currentTask?.id });
+        }
+    });
+
+    socket.on('updateTask', ({ roomId, taskId, updates }) => {
+        const updatedTask = roomManager.updateTask(roomId, socket.id, taskId, updates);
+        if (updatedTask) {
+            const tasks = roomManager.getTasks(roomId);
+            const currentTask = roomManager.getCurrentTask(roomId);
+            io.to(roomId).emit('tasksUpdated', { tasks, currentTaskId: currentTask?.id });
+        }
+    });
+
+    socket.on('deleteTask', ({ roomId, taskId }) => {
+        if (roomManager.deleteTask(roomId, socket.id, taskId)) {
+            const tasks = roomManager.getTasks(roomId);
+            const currentTask = roomManager.getCurrentTask(roomId);
+            io.to(roomId).emit('tasksUpdated', { tasks, currentTaskId: currentTask?.id });
+        }
+    });
+
+    socket.on('setCurrentTask', ({ roomId, taskId }) => {
+        if (roomManager.setCurrentTask(roomId, socket.id, taskId)) {
+            const tasks = roomManager.getTasks(roomId);
+            const currentTask = roomManager.getCurrentTask(roomId);
+            
+            // Clear existing votes and notify clients
+            io.to(roomId).emit('votesUpdated', {});
+            io.to(roomId).emit('tasksUpdated', { tasks, currentTaskId: currentTask?.id });
+        }
+    });
+
     socket.on('disconnect', () => {
         console.log('Client disconnected:', socket.id);
         // Remove user from all rooms and clean up votes
@@ -145,7 +190,9 @@ io.on('connection', (socket) => {
             if (roomId !== socket.id) { // socket.id is always in socket.rooms
                 const users = roomManager.getRoomUsers(roomId);
                 const hostId = roomManager.getHostId(roomId);
-                io.to(roomId).emit('roomState', { users, hostId });
+                const tasks = roomManager.getTasks(roomId);
+                const currentTask = roomManager.getCurrentTask(roomId);
+                io.to(roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id });
             }
         });
 

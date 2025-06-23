@@ -3,11 +3,23 @@ interface User {
     username: string;
 }
 
+interface Task {
+    id: string;
+    title: string;
+    description?: string;
+    link?: string;
+    status: 'pending' | 'in_progress' | 'completed';
+    finalEstimate?: string;
+    createdAt: Date;
+}
+
 interface Room {
     id: string;
     votes: Record<string, string>;
     users: Map<string, User>;
     hostId: string;
+    tasks: Task[];
+    currentTaskId?: string;
 }
 
 interface RoomInfo {
@@ -32,7 +44,9 @@ export class RoomManager {
             id: roomId,
             votes: {},
             users: new Map([[hostId, { id: hostId, username: hostUsername }]]),
-            hostId
+            hostId,
+            tasks: [],
+            currentTaskId: undefined
         });
     }
 
@@ -171,5 +185,95 @@ export class RoomManager {
     getHostId(roomId: string): string | null {
         const room = this.rooms.get(roomId);
         return room ? room.hostId : null;
+    }
+
+    createTask(roomId: string, hostId: string, task: Omit<Task, 'id' | 'createdAt'>): Task | null {
+        const room = this.rooms.get(roomId);
+        if (!room || room.hostId !== hostId) {
+            return null;
+        }
+
+        const newTask: Task = {
+            ...task,
+            id: `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            createdAt: new Date()
+        };
+
+        room.tasks.push(newTask);
+        return newTask;
+    }
+
+    updateTask(roomId: string, hostId: string, taskId: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>): Task | null {
+        const room = this.rooms.get(roomId);
+        if (!room || room.hostId !== hostId) {
+            return null;
+        }
+
+        const taskIndex = room.tasks.findIndex(task => task.id === taskId);
+        if (taskIndex === -1) {
+            return null;
+        }
+
+        room.tasks[taskIndex] = { ...room.tasks[taskIndex], ...updates };
+        return room.tasks[taskIndex];
+    }
+
+    deleteTask(roomId: string, hostId: string, taskId: string): boolean {
+        const room = this.rooms.get(roomId);
+        if (!room || room.hostId !== hostId) {
+            return false;
+        }
+
+        const taskIndex = room.tasks.findIndex(task => task.id === taskId);
+        if (taskIndex === -1) {
+            return false;
+        }
+
+        room.tasks.splice(taskIndex, 1);
+        
+        if (room.currentTaskId === taskId) {
+            room.currentTaskId = undefined;
+        }
+
+        return true;
+    }
+
+    setCurrentTask(roomId: string, hostId: string, taskId: string): boolean {
+        const room = this.rooms.get(roomId);
+        if (!room || room.hostId !== hostId) {
+            return false;
+        }
+
+        const task = room.tasks.find(task => task.id === taskId);
+        if (!task) {
+            return false;
+        }
+
+        if (room.currentTaskId) {
+            const currentTask = room.tasks.find(t => t.id === room.currentTaskId);
+            if (currentTask && currentTask.status === 'in_progress') {
+                currentTask.status = 'pending';
+            }
+        }
+
+        room.currentTaskId = taskId;
+        task.status = 'in_progress';
+        room.votes = {};
+
+        return true;
+    }
+
+    getTasks(roomId: string): Task[] {
+        const room = this.rooms.get(roomId);
+        return room ? room.tasks : [];
+    }
+
+    getCurrentTask(roomId: string): Task | null {
+        const room = this.rooms.get(roomId);
+        if (!room || !room.currentTaskId) {
+            return null;
+        }
+
+        return room.tasks.find(task => task.id === room.currentTaskId) || null;
     }
 } 
