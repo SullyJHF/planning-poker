@@ -84,14 +84,14 @@ export const TaskList: React.FC<TaskListProps> = ({
         if (editingTask) {
             onUpdateTask(editingTask.id, {
                 ticketId: formData.ticketId,
-                description: formData.description || undefined,
+                description: formData.description, // Allow empty strings to clear description
                 status: formData.status
             });
             setEditingTask(null);
         } else {
             onCreateTask({
                 ticketId: formData.ticketId,
-                description: formData.description || undefined,
+                description: formData.description || undefined, // Keep undefined for new tasks if empty
                 status: formData.status
             });
         }
