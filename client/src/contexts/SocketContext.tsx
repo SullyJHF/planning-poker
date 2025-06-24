@@ -61,6 +61,22 @@ export const SocketProvider: React.FC<{ children: React.ReactNode; }> = ({ child
             console.log('Failed to reconnect');
         });
 
+        // Handle room events
+        newSocket.on('roomCreated', (roomId: string) => {
+            console.log('SocketContext: roomCreated event received, setting roomId to:', roomId);
+            setRoomId(roomId);
+        });
+
+        newSocket.on('roomJoined', (roomId: string) => {
+            console.log('SocketContext: roomJoined event received, setting roomId to:', roomId);
+            setRoomId(roomId);
+        });
+
+        newSocket.on('roomLeft', () => {
+            console.log('SocketContext: roomLeft event received, clearing roomId');
+            setRoomId(null);
+        });
+
         // Set up periodic connection check
         const checkConnection = () => {
             if (newSocket) {

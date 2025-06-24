@@ -42,9 +42,19 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
     const [jiraBaseUrl, setJiraBaseUrl] = useState<string>('');
 
     useEffect(() => {
-        if (!socket) return;
+        if (!socket || !roomId) return;
+
+        // Request current room state when component mounts
+        console.log('RoomView: Requesting room state for room:', roomId);
+        socket.emit('getRoomState', { roomId });
 
         socket.on('roomState', (data: { users: User[]; hostId: string; tasks: Task[]; currentTaskId?: string; jiraBaseUrl?: string; }) => {
+            console.log('RoomView: Received room state:', {
+                userCount: data.users.length,
+                users: data.users.map(u => `${u.username}(${u.id})`),
+                hostId: data.hostId,
+                mySocketId: socket.id
+            });
             setUsers(data.users);
             setHostId(data.hostId);
             setIsHost(data.hostId === socket.id);
@@ -108,7 +118,7 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
             socket.off('estimationResult');
             socket.off('jiraBaseUrlUpdated');
         };
-    }, [socket, sessionPhase]);
+    }, [socket, sessionPhase, roomId]);
 
     const handleSelectCard = (value: CardValue) => {
         if (socket && roomId) {
@@ -252,6 +262,7 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
                         onSelectCard={handleSelectCard} 
                         selectedCard={selectedCard}
                         disabled={sessionPhase !== 'voting'}
+                        isVisible={sessionPhase === 'voting'}
                     />
                     
                     <div className="votes">
