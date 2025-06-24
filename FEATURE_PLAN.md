@@ -24,7 +24,7 @@ The application currently supports:
 ~~**Current Issue**: Users can only estimate one implicit task - there's no way to define what they're estimating.~~
 
 **✅ Completed Features:**
-- **✅ Ticket Creation**: Any user can create and manage tickets (not just hosts)
+- **✅ Ticket Creation**: Any user can create, edit, and delete tickets (collaborative management)
 - **✅ Ticket Details**: Each ticket includes:
   - Ticket ID (required, e.g., PROJ-123)
   - Description (optional, used for context/details)
@@ -52,7 +52,10 @@ The application currently supports:
 - ✅ Added socket events: createTask, updateTask, deleteTask, setCurrentTask, updateJiraBaseUrl
 - ✅ Implemented ticket state management in RoomManager with per-room Jira settings
 - ✅ Simplified data model (removed title field, ticket ID is primary identifier)
-- ✅ Enhanced UI with always-visible host controls and consistent button sizing
+- ✅ Enhanced UI with always-visible edit/delete controls for all users
+- ✅ Collaborative task management - any room member can edit/delete tasks
+- ✅ Clean editing experience with hidden original cards during editing
+- ✅ Proper empty description handling for task clearing
 
 ### 2. Local Username Caching
 **Priority: High**
@@ -144,15 +147,19 @@ The application currently supports:
 - **✅ Username Persistence**: Global username context eliminates duplicate username prompts
 - **✅ Room Validation**: Server-side room existence checking with proper error handling
 - **✅ Browser Navigation**: Full support for back/forward buttons and bookmarking
-- **✅ Error Handling**: Graceful handling of invalid room IDs with automatic redirect
+- **✅ Error Handling**: Graceful handling of invalid room IDs with toast notifications and automatic redirect
+- **✅ Card Animation**: Sequential card animations when voting starts, creating engaging visual feedback
 
 **✅ Technical Implementation:**
 - ✅ Added React Router DOM with BrowserRouter, Routes, and Route components
 - ✅ Created UsernameContext for global username state management
 - ✅ Implemented LobbyRoute and RoomRoute components with proper navigation
 - ✅ Added `roomExists()` method to server RoomManager
-- ✅ Enhanced socket event handling for room validation
+- ✅ Enhanced socket event handling for room validation  
 - ✅ Updated navigation flow to use programmatic routing
+- ✅ Integrated react-toastify for user-friendly error notifications
+- ✅ Implemented card animation system with sequential timing and CSS transitions
+- ✅ Fixed leave room race conditions and phantom user issues
 
 ### 7. Enhanced Voting System
 **Priority: Medium**

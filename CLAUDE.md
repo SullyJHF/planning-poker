@@ -47,7 +47,7 @@ This is a **real-time planning poker application** built with a React frontend a
 1. **Socket Connection**: SocketContext establishes WebSocket connection with automatic reconnection
 2. **Room Management**: RoomManager handles all room state (users, votes, tickets, host transfers, Jira settings)
 3. **Real-time Updates**: All state changes broadcast to relevant room participants via Socket.IO
-4. **Collaborative Tickets**: Any user can create tickets; hosts manage room settings and voting
+4. **Collaborative Tickets**: Any user can create, edit, and delete tickets; hosts manage room settings and voting
 
 ### Socket Events
 
@@ -80,6 +80,8 @@ REACT_APP_SERVER_URL=http://localhost:3001
 - Hover effects with `translateY(-1px)` transforms and shadows
 - Consistent button styling with blue (`#89b4fa`) primary color
 - Card-based design with rounded corners and subtle borders
+- **Card Animations**: Sequential card animations when voting starts (cards fan up from left to right)
+- **Toast Notifications**: User-friendly error messages using react-toastify with dark theme
 
 ## Ticket Management Features
 
@@ -91,7 +93,7 @@ REACT_APP_SERVER_URL=http://localhost:3001
 - Creation timestamp
 
 ### User Capabilities
-- **All Users**: Create, edit tickets (collaborative workflow)
+- **All Users**: Create, edit, and delete tickets (fully collaborative workflow)
 - **Hosts Only**: Configure Jira base URL, manage voting sessions, set current ticket
 
 ### Jira Integration
@@ -102,9 +104,11 @@ REACT_APP_SERVER_URL=http://localhost:3001
 
 ### Ticket UI
 - **Newest First**: New tickets appear at top of list
-- **Always-Visible Controls**: Host action buttons (play, edit, delete) always visible with hover effects
+- **Always-Visible Controls**: Edit/delete buttons available to all users; play button for hosts only
 - **Streamlined Form**: Just ticket ID (required) and description (optional)
 - **Smart Linking**: Ticket titles become links when Jira URL is set, plain text otherwise
+- **Clean Editing Experience**: Original ticket card hidden during editing for clutter-free UX
+- **Empty Description Support**: Users can completely clear descriptions if desired
 
 ## Development Notes
 
@@ -115,5 +119,8 @@ REACT_APP_SERVER_URL=http://localhost:3001
 - Room cleanup when last user leaves
 - Font Awesome integration for consistent iconography
 - Responsive three-column layout with proper overflow handling
+- **React Router Integration**: Full URL-based navigation with shareable room links
+- **Error Handling**: Toast notifications for invalid rooms with automatic redirect
+- **Leave Room Fix**: Resolved race conditions and phantom user issues
 - Don't ever run npm start, I will do that myself and test changes there
 - You can run npm run build to check for build errors though
