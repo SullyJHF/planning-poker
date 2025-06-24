@@ -140,13 +140,13 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
     };
 
     const handleUpdateTask = (taskId: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => {
-        if (socket && roomId && isHost) {
+        if (socket && roomId) {
             socket.emit('updateTask', { roomId, taskId, updates });
         }
     };
 
     const handleDeleteTask = (taskId: string) => {
-        if (socket && roomId && isHost) {
+        if (socket && roomId) {
             socket.emit('deleteTask', { roomId, taskId });
         }
     };

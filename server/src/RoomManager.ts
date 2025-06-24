@@ -244,9 +244,9 @@ export class RoomManager {
         return newTask;
     }
 
-    updateTask(roomId: string, hostId: string, taskId: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>): Task | null {
+    updateTask(roomId: string, userId: string, taskId: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>): Task | null {
         const room = this.rooms.get(roomId);
-        if (!room || room.hostId !== hostId) {
+        if (!room || !room.users.has(userId)) {
             return null;
         }
 
@@ -259,9 +259,9 @@ export class RoomManager {
         return room.tasks[taskIndex];
     }
 
-    deleteTask(roomId: string, hostId: string, taskId: string): boolean {
+    deleteTask(roomId: string, userId: string, taskId: string): boolean {
         const room = this.rooms.get(roomId);
-        if (!room || room.hostId !== hostId) {
+        if (!room || !room.users.has(userId)) {
             return false;
         }
 

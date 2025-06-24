@@ -228,14 +228,20 @@ export const TaskList: React.FC<TaskListProps> = ({
             <div className="tasks-container">
                 {tasks.length === 0 && !showForm ? (
                     <div className="no-tasks">
-                        {isHost ? 'Click + to add your first ticket' : 'No tickets yet'}
+                        Click + to add your first ticket
                     </div>
                 ) : (
-                    tasks.map(task => (
-                        <div 
-                            key={task.id} 
-                            className={`task-item ${task.id === currentTaskId ? 'current' : ''}`}
-                        >
+                    tasks.map(task => {
+                        // Hide the task card if it's currently being edited
+                        if (editingTask && editingTask.id === task.id) {
+                            return null;
+                        }
+                        
+                        return (
+                            <div 
+                                key={task.id} 
+                                className={`task-item ${task.id === currentTaskId ? 'current' : ''}`}
+                            >
                             <div className="task-header">
                                 <span className="task-status" title={task.status}>
                                     {getStatusIcon(task.status)}
@@ -249,33 +255,31 @@ export const TaskList: React.FC<TaskListProps> = ({
                                         task.ticketId
                                     )}
                                 </span>
-                                {isHost && (
-                                    <div className="task-actions">
-                                        {task.status !== 'in_progress' && (
-                                            <button
-                                                className="select-task-btn"
-                                                onClick={() => onSetCurrentTask(task.id)}
-                                                title="Select this task"
-                                            >
-                                                <FontAwesomeIcon icon={faPlay} />
-                                            </button>
-                                        )}
+                                <div className="task-actions">
+                                    {isHost && task.status !== 'in_progress' && (
                                         <button
-                                            className="edit-task-btn"
-                                            onClick={() => handleEdit(task)}
-                                            title="Edit task"
+                                            className="select-task-btn"
+                                            onClick={() => onSetCurrentTask(task.id)}
+                                            title="Select this task"
                                         >
-                                            <FontAwesomeIcon icon={faEdit} />
+                                            <FontAwesomeIcon icon={faPlay} />
                                         </button>
-                                        <button
-                                            className="delete-task-btn"
-                                            onClick={() => onDeleteTask(task.id)}
-                                            title="Delete task"
-                                        >
-                                            <FontAwesomeIcon icon={faTrashAlt} />
-                                        </button>
-                                    </div>
-                                )}
+                                    )}
+                                    <button
+                                        className="edit-task-btn"
+                                        onClick={() => handleEdit(task)}
+                                        title="Edit task"
+                                    >
+                                        <FontAwesomeIcon icon={faEdit} />
+                                    </button>
+                                    <button
+                                        className="delete-task-btn"
+                                        onClick={() => onDeleteTask(task.id)}
+                                        title="Delete task"
+                                    >
+                                        <FontAwesomeIcon icon={faTrashAlt} />
+                                    </button>
+                                </div>
                             </div>
                             {task.description && (
                                 <div className="task-description">{task.description}</div>
@@ -286,7 +290,8 @@ export const TaskList: React.FC<TaskListProps> = ({
                                 </div>
                             )}
                         </div>
-                    ))
+                        );
+                    })
                 )}
             </div>
         </div>
