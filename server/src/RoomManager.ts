@@ -100,12 +100,15 @@ export class RoomManager {
         return true;
     }
 
-    handleDisconnect(userId: string): void {
+    handleDisconnect(userId: string): string[] {
+        const affectedRooms: string[] = [];
+        
         // Remove user from all rooms and their votes
-        this.rooms.forEach((room) => {
+        this.rooms.forEach((room, roomId) => {
             if (room.users.has(userId)) {
                 room.users.delete(userId);
                 delete room.votes[userId];
+                affectedRooms.push(roomId);
 
                 // If the host disconnects, assign a new host
                 if (room.hostId === userId && room.users.size > 0) {
@@ -114,8 +117,15 @@ export class RoomManager {
                         room.hostId = newHost;
                     }
                 }
+                
+                // If no users left, delete the room
+                if (room.users.size === 0) {
+                    this.rooms.delete(roomId);
+                }
             }
         });
+        
+        return affectedRooms;
     }
 
     getRoomVotes(roomId: string): Record<string, { value: string; username: string; }> {

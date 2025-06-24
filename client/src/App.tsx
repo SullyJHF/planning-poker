@@ -1,10 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import { SocketProvider } from './contexts/SocketContext';
 import { UsernameProvider, useUsername } from './contexts/UsernameContext';
 import { UsernameInput } from './components/UsernameInput';
 import { LobbyRoute } from './components/routes/LobbyRoute';
 import { RoomRoute } from './components/routes/RoomRoute';
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
 function AppContent() {
@@ -30,6 +32,19 @@ function AppContent() {
                     </div>
                 </div>
             )}
+            
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+            />
         </>
     );
 }

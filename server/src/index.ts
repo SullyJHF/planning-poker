@@ -53,7 +53,12 @@ io.on('connection', (socket) => {
             const tasks = roomManager.getTasks(data.roomId);
             const currentTask = roomManager.getCurrentTask(data.roomId);
             const jiraBaseUrl = roomManager.getJiraBaseUrl(data.roomId);
-            io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
+            const roomState = { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl };
+            
+            // Send to the creating socket first
+            socket.emit('roomState', roomState);
+            // Then broadcast to the room
+            io.to(data.roomId).emit('roomState', roomState);
 
             // Broadcast updated room list
             broadcastRoomList();
@@ -64,9 +69,11 @@ io.on('connection', (socket) => {
 
     socket.on('joinRoom', (data: { roomId: string; username: string; }) => {
         try {
+            console.log(`Server: joinRoom attempt - roomId: ${data.roomId}, username: ${data.username}, socket: ${socket.id}`);
+            
             if (roomManager.joinRoom(data.roomId, socket.id, data.username)) {
                 socket.join(data.roomId);
-                console.log(`User ${data.username} joined room: ${data.roomId}`);
+                console.log(`Server: User ${data.username} successfully joined room: ${data.roomId}`);
                 socket.emit('roomJoined', data.roomId);
 
                 // Notify others in the room
@@ -80,6 +87,7 @@ io.on('connection', (socket) => {
                 const sessionState = roomManager.getSessionState(data.roomId);
                 const jiraBaseUrl = roomManager.getJiraBaseUrl(data.roomId);
                 
+                console.log(`Server: Broadcasting room state to room ${data.roomId} - ${users.length} users:`, users.map(u => `${u.username}(${u.id})`));
                 io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
                 
                 // Send current votes and session state to the new user
@@ -92,6 +100,7 @@ io.on('connection', (socket) => {
                 // Broadcast updated room list
                 broadcastRoomList();
             } else {
+                console.log(`Server: Failed to join room ${data.roomId} - room may not exist`);
                 socket.emit('error', 'Room not found');
             }
         } catch (error) {
@@ -127,24 +136,34 @@ io.on('connection', (socket) => {
     });
 
     socket.on('leaveRoom', ({ roomId }) => {
+        console.log(`Server: leaveRoom event - roomId: ${roomId}, socket: ${socket.id}`);
         if (roomManager.leaveRoom(roomId, socket.id)) {
             socket.leave(roomId);
+            console.log(`Server: User ${socket.id} successfully left room ${roomId}`);
             socket.emit('roomLeft');
 
             // Notify remaining users in the room
             const room = roomManager.getRoomUsers(roomId);
+            console.log(`Server: After leave, room ${roomId} has ${room.length} users:`, room.map(u => `${u.username}(${u.id})`));
             if (room.length > 0) {
                 const hostId = roomManager.getHostId(roomId);
                 if (hostId) {
                     const tasks = roomManager.getTasks(roomId);
                     const currentTask = roomManager.getCurrentTask(roomId);
                     const jiraBaseUrl = roomManager.getJiraBaseUrl(roomId);
+                    console.log(`Server: Broadcasting updated room state to ${room.length} users in room ${roomId}`);
+                    console.log(`Server: Emitting roomState to room ${roomId}`);
                     io.to(roomId).emit('roomState', { users: room, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
+                    console.log(`Server: Emitting hostChanged to room ${roomId}`);
                     io.to(roomId).emit('hostChanged', hostId);
                 }
+            } else {
+                console.log(`Server: Room ${roomId} is now empty`);
             }
             // Broadcast updated room list when someone leaves
             broadcastRoomList();
+        } else {
+            console.log(`Server: Failed to leave room ${roomId} - user ${socket.id} not in room`);
         }
     });
 
@@ -252,21 +271,64 @@ io.on('connection', (socket) => {
         callback(exists);
     });
 
+    socket.on('getRoomList', () => {
+        console.log(`Server: getRoomList requested by socket ${socket.id}`);
+        const rooms = roomManager.getActiveRooms();
+        console.log(`Server: Sending room list with ${rooms.length} rooms to socket ${socket.id}`);
+        socket.emit('roomList', rooms);
+    });
+
+    socket.on('getRoomState', ({ roomId }: { roomId: string }) => {
+        console.log(`Server: getRoomState requested for room ${roomId} by socket ${socket.id}`);
+        const users = roomManager.getRoomUsers(roomId);
+        const hostId = roomManager.getHostId(roomId);
+        const tasks = roomManager.getTasks(roomId);
+        const currentTask = roomManager.getCurrentTask(roomId);
+        const sessionState = roomManager.getSessionState(roomId);
+        const jiraBaseUrl = roomManager.getJiraBaseUrl(roomId);
+        const votes = roomManager.getRoomVotes(roomId);
+        
+        console.log(`Server: Room ${roomId} has ${users.length} users:`, users);
+        
+        if (users.length > 0) { // Only send state if room exists and has users
+            console.log(`Server: Sending room state for room ${roomId}`);
+            socket.emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
+            socket.emit('votesUpdated', votes);
+            if (sessionState) {
+                socket.emit('sessionStateUpdated', sessionState);
+            }
+        } else {
+            console.log(`Server: Room ${roomId} has no users, not sending state`);
+        }
+    });
+
     socket.on('disconnect', () => {
         console.log('Client disconnected:', socket.id);
-        // Remove user from all rooms and clean up votes
-        roomManager.handleDisconnect(socket.id);
+        
+        // Remove user from all rooms and get list of affected rooms
+        const affectedRooms = roomManager.handleDisconnect(socket.id);
+        console.log(`Server: User ${socket.id} was removed from rooms:`, affectedRooms);
 
-        // Notify all rooms the user was in
-        socket.rooms.forEach(roomId => {
-            if (roomId !== socket.id) { // socket.id is always in socket.rooms
-                const users = roomManager.getRoomUsers(roomId);
+        // Notify remaining users in affected rooms
+        affectedRooms.forEach(roomId => {
+            const users = roomManager.getRoomUsers(roomId);
+            console.log(`Server: Broadcasting disconnect update to room ${roomId} with ${users.length} remaining users`);
+            
+            if (users.length > 0) {
+                // Room still has users, broadcast updated state
                 const hostId = roomManager.getHostId(roomId);
                 const tasks = roomManager.getTasks(roomId);
                 const currentTask = roomManager.getCurrentTask(roomId);
                 const jiraBaseUrl = roomManager.getJiraBaseUrl(roomId);
+                
                 io.to(roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
+                
+                // If host changed, notify about that too
+                if (hostId) {
+                    io.to(roomId).emit('hostChanged', hostId);
+                }
             }
+            // If room is empty, it's already been deleted by handleDisconnect
         });
 
         // Broadcast updated room list
