@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLock, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useSocket } from '../../contexts/SocketContext';
 import { useUsername } from '../../contexts/UsernameContext';
 import { RoomView } from '../RoomView';
@@ -14,6 +16,9 @@ export const RoomRoute: React.FC = () => {
     const { username, setShowUsernameInput } = useUsername();
     const [roomExists, setRoomExists] = useState<boolean | null>(null);
     const [isLeaving, setIsLeaving] = useState(false);
+    const [needsPassword, setNeedsPassword] = useState(false);
+    const [password, setPassword] = useState('');
+    const [isJoining, setIsJoining] = useState(false);
     
     // Check if we just created this room
     const justCreated = location.state?.justCreated === true;
@@ -30,6 +35,65 @@ export const RoomRoute: React.FC = () => {
             socket.emit('leaveRoom', { roomId: socketRoomId });
         } else {
             navigate('/');
+        }
+    };
+
+    const attemptJoinRoom = useCallback((passwordAttempt?: string) => {
+        if (!socket || !roomId || !username) return;
+        
+        setIsJoining(true);
+        socket.emit('joinRoom', { roomId, username, password: passwordAttempt });
+        
+        // Listen for join failure (room needs password or wrong password)
+        const handleJoinFailure = () => {
+            setIsJoining(false);
+            setNeedsPassword(true);
+            socket.off('roomJoined', handleJoinSuccess);
+            socket.off('error', handleJoinFailure);
+        };
+        
+        const handleJoinSuccess = () => {
+            setIsJoining(false);
+            setNeedsPassword(false);
+            setPassword('');
+            socket.off('roomJoined', handleJoinSuccess);
+            socket.off('error', handleJoinFailure);
+        };
+        
+        socket.once('roomJoined', handleJoinSuccess);
+        socket.once('error', handleJoinFailure);
+    }, [socket, roomId, username]);
+
+    const handlePasswordSubmit = () => {
+        if (password.trim()) {
+            attemptJoinRoom(password);
+        }
+    };
+
+    const handlePasswordCancel = () => {
+        setNeedsPassword(false);
+        setPassword('');
+        navigate('/', { replace: true });
+    };
+
+    const handleCopyLink = async () => {
+        const roomUrl = `${window.location.origin}/room/${roomId}`;
+        try {
+            await navigator.clipboard.writeText(roomUrl);
+            toast.success('Room link copied to clipboard!', {
+                autoClose: 2000,
+            });
+        } catch (err) {
+            // Fallback for browsers that don't support clipboard API
+            const textArea = document.createElement('textarea');
+            textArea.value = roomUrl;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            toast.success('Room link copied to clipboard!', {
+                autoClose: 2000,
+            });
         }
     };
 
@@ -80,11 +144,11 @@ export const RoomRoute: React.FC = () => {
             shouldJoin: socket && roomId && username && roomExists && !socketRoomId && !isLeaving
         });
         
-        if (socket && roomId && username && roomExists && !socketRoomId && !isLeaving) {
+        if (socket && roomId && username && roomExists && !socketRoomId && !isLeaving && !needsPassword) {
             console.log('RoomRoute: Emitting joinRoom event');
-            socket.emit('joinRoom', { roomId, username });
+            attemptJoinRoom();
         }
-    }, [socket, roomId, username, roomExists, socketRoomId, isLeaving]);
+    }, [socket, roomId, username, roomExists, socketRoomId, isLeaving, needsPassword, attemptJoinRoom]);
 
     // Note: socketRoomId will be set automatically by SocketContext when we receive roomJoined event
 
@@ -112,6 +176,67 @@ export const RoomRoute: React.FC = () => {
     }
 
     // If room doesn't exist, we redirect immediately with toast, so this won't be reached
+
+    // Show password modal if room requires password
+    if (needsPassword && roomExists) {
+        return (
+            <div className="App">
+                <main className="App-content">
+                    <div className="lobby-container">
+                        <div className="lobby-header">
+                            <div className="lobby-title-row">
+                                <h1>Planning Poker</h1>
+                                <ConnectionStatus />
+                            </div>
+                        </div>
+                        <div className="password-modal-overlay">
+                            <div className="password-modal">
+                                <div className="password-modal-header">
+                                    <div className="password-modal-title">
+                                        <FontAwesomeIcon icon={faLock} />
+                                        <h3>Private Room</h3>
+                                    </div>
+                                    <button className="close-btn" onClick={handlePasswordCancel}>
+                                        <FontAwesomeIcon icon={faTimes} />
+                                    </button>
+                                </div>
+                                <div className="password-modal-content">
+                                    <p>This room is password protected. Please enter the password to join.</p>
+                                    <div className="password-input">
+                                        <input
+                                            type="password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="Enter room password"
+                                            autoFocus
+                                            onKeyPress={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                                            disabled={isJoining}
+                                        />
+                                    </div>
+                                    <div className="password-modal-actions">
+                                        <button 
+                                            className="cancel-btn" 
+                                            onClick={handlePasswordCancel}
+                                            disabled={isJoining}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button 
+                                            className="join-btn" 
+                                            onClick={handlePasswordSubmit}
+                                            disabled={!password.trim() || isJoining}
+                                        >
+                                            {isJoining ? 'Joining...' : 'Join Room'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        );
+    }
 
     // If no username is set, show loading state (username input will be handled by App)
     if (!username) {
@@ -150,7 +275,13 @@ export const RoomRoute: React.FC = () => {
                     </div>
                 </div>
                 <div className="header-right">
-                    <span className="room-id">Room ID: {roomId}</span>
+                    <button 
+                        className="room-id-btn" 
+                        onClick={handleCopyLink}
+                        title="Click to copy room link"
+                    >
+                        Room ID: {roomId}
+                    </button>
                     <button className="leave-room-btn" onClick={handleLeaveRoom}>
                         Leave Room
                     </button>

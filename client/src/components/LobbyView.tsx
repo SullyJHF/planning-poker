@@ -36,10 +36,15 @@ export const LobbyView: React.FC<LobbyViewProps> = ({ username }) => {
         };
     }, [socket, navigate]);
 
-    const handleCreateRoom = () => {
+    const handleCreateRoom = (isPrivate: boolean, password?: string) => {
         if (socket && username) {
             const newRoomId = Math.random().toString(36).substring(2, 8);
-            socket.emit('createRoom', { roomId: newRoomId, username });
+            socket.emit('createRoom', { 
+                roomId: newRoomId, 
+                username,
+                isPrivate,
+                password 
+            });
             // Navigation will happen in the roomCreated event handler
         }
     };

@@ -216,4 +216,142 @@
 
 .lobby-header p button:hover {
   background: #74c7ec;
+}
+
+/* Password Modal Styles */
+.password-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.password-modal {
+  background: #1e1e2e;
+  border: 1px solid #313244;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.password-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #313244;
+}
+
+.password-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #cdd6f4;
+}
+
+.password-modal-title h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.password-modal-content {
+  padding: 24px;
+}
+
+.password-modal-content p {
+  margin: 0 0 20px 0;
+  color: #cdd6f4;
+  line-height: 1.5;
+}
+
+.password-modal-content .password-input {
+  margin-bottom: 24px;
+}
+
+.password-modal-content .password-input input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #313244;
+  border-radius: 8px;
+  background: #181825;
+  color: #cdd6f4;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.password-modal-content .password-input input:focus {
+  outline: none;
+  border-color: #89b4fa;
+}
+
+.password-modal-content .password-input input::placeholder {
+  color: #6c7086;
+}
+
+.password-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.password-modal-actions .cancel-btn,
+.password-modal-actions .join-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.password-modal-actions .cancel-btn {
+  background: #45475a;
+  color: #cdd6f4;
+}
+
+.password-modal-actions .cancel-btn:hover:not(:disabled) {
+  background: #585b70;
+}
+
+.password-modal-actions .join-btn {
+  background: #89b4fa;
+  color: white;
+}
+
+.password-modal-actions .join-btn:hover:not(:disabled) {
+  background: #74c7ec;
+}
+
+.password-modal-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Room ID Button */
+.room-id-btn {
+  background: none;
+  border: 1px solid #313244;
+  color: #cdd6f4;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  margin-right: 12px;
+}
+
+.room-id-btn:hover {
+  background: #313244;
+  border-color: #89b4fa;
+  color: #89b4fa;
+  transform: translateY(-1px);
 } 

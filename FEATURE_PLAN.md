@@ -102,6 +102,7 @@ The application currently supports:
 - **Room Visibility**: Private rooms hidden from public room list
 - **Direct Link Access**: Private rooms accessible via direct link + password
 - **Host Password Management**: Host can view/change room password
+- **Copy Link Button**: A copy link button should be available inside the game, maybe clicking the room id label in the header does this
 
 **Implementation Plan:**
 - Extend Room interface to include isPrivate and password fields

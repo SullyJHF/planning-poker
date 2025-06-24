@@ -40,11 +40,11 @@ io.on('connection', (socket) => {
         callback(true);
     });
 
-    socket.on('createRoom', (data: { roomId: string; username: string; }) => {
+    socket.on('createRoom', (data: { roomId: string; username: string; isPrivate?: boolean; password?: string; }) => {
         try {
-            roomManager.createRoom(data.roomId, socket.id, data.username);
+            roomManager.createRoom(data.roomId, socket.id, data.username, data.isPrivate || false, data.password);
             socket.join(data.roomId);
-            console.log(`Room created: ${data.roomId} by ${data.username}`);
+            console.log(`Room created: ${data.roomId} by ${data.username} (${data.isPrivate ? 'private' : 'public'})`);
             socket.emit('roomCreated', data.roomId);
 
             // Send current room state
@@ -67,11 +67,11 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('joinRoom', (data: { roomId: string; username: string; }) => {
+    socket.on('joinRoom', (data: { roomId: string; username: string; password?: string; }) => {
         try {
             console.log(`Server: joinRoom attempt - roomId: ${data.roomId}, username: ${data.username}, socket: ${socket.id}`);
             
-            if (roomManager.joinRoom(data.roomId, socket.id, data.username)) {
+            if (roomManager.joinRoom(data.roomId, socket.id, data.username, data.password)) {
                 socket.join(data.roomId);
                 console.log(`Server: User ${data.username} successfully joined room: ${data.roomId}`);
                 socket.emit('roomJoined', data.roomId);
@@ -299,6 +299,19 @@ io.on('connection', (socket) => {
             }
         } else {
             console.log(`Server: Room ${roomId} has no users, not sending state`);
+        }
+    });
+
+    socket.on('validateRoomPassword', ({ roomId, password }, callback) => {
+        const isValid = roomManager.validateRoomPassword(roomId, password);
+        callback(isValid);
+    });
+
+    socket.on('updateRoomPassword', ({ roomId, password }) => {
+        if (roomManager.updateRoomPassword(roomId, socket.id, password)) {
+            socket.emit('roomPasswordUpdated', { success: true });
+        } else {
+            socket.emit('roomPasswordUpdated', { success: false, error: 'Unauthorized or room not found' });
         }
     });
 

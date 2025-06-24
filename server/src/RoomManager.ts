@@ -32,6 +32,8 @@ interface Room {
     sessionPhase: SessionPhase;
     estimationResult?: EstimationResult;
     jiraBaseUrl: string;
+    isPrivate: boolean;
+    password?: string;
 }
 
 interface RoomInfo {
@@ -47,7 +49,7 @@ export class RoomManager {
         this.rooms = new Map();
     }
 
-    createRoom(roomId: string, hostId: string, hostUsername: string): void {
+    createRoom(roomId: string, hostId: string, hostUsername: string, isPrivate: boolean = false, password?: string): void {
         if (this.rooms.has(roomId)) {
             throw new Error('Room already exists');
         }
@@ -61,13 +63,45 @@ export class RoomManager {
             currentTaskId: undefined,
             sessionPhase: 'idle',
             estimationResult: undefined,
-            jiraBaseUrl: ''
+            jiraBaseUrl: '',
+            isPrivate,
+            password: isPrivate ? password : undefined
         });
     }
 
-    joinRoom(roomId: string, userId: string, username: string): boolean {
+    validateRoomPassword(roomId: string, password?: string): boolean {
         const room = this.rooms.get(roomId);
         if (!room) {
+            return false;
+        }
+        
+        // Public rooms don't need password validation
+        if (!room.isPrivate) {
+            return true;
+        }
+        
+        // Private rooms require password
+        return room.password === password;
+    }
+
+    updateRoomPassword(roomId: string, hostId: string, newPassword?: string): boolean {
+        const room = this.rooms.get(roomId);
+        if (!room || room.hostId !== hostId) {
+            return false;
+        }
+        
+        room.password = room.isPrivate ? newPassword : undefined;
+        return true;
+    }
+
+    joinRoom(roomId: string, userId: string, username: string, password?: string): boolean {
+        const room = this.rooms.get(roomId);
+        if (!room) {
+            return false;
+        }
+        
+        // Check password for private rooms
+        if (room.isPrivate && !this.validateRoomPassword(roomId, password)) {
             return false;
         }
 
@@ -168,14 +202,16 @@ export class RoomManager {
     }
 
     getActiveRooms(): RoomInfo[] {
-        return Array.from(this.rooms.entries()).map(([id, room]) => {
-            const host = room.users.get(room.hostId);
-            return {
-                id,
-                userCount: room.users.size,
-                hostUsername: host?.username || 'Unknown'
-            };
-        });
+        return Array.from(this.rooms.entries())
+            .filter(([id, room]) => !room.isPrivate) // Filter out private rooms
+            .map(([id, room]) => {
+                const host = room.users.get(room.hostId);
+                return {
+                    id,
+                    userCount: room.users.size,
+                    hostUsername: host?.username || 'Unknown'
+                };
+            });
     }
 
     clearVotes(roomId: string): boolean {
