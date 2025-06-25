@@ -43,6 +43,7 @@ This is a **real-time planning poker application** built with a React frontend a
   - `CardDeck.tsx` - Planning poker cards for voting
   - `UsernameInput.tsx` - Username entry modal
   - `routes/RoomRoute.tsx` - Room URL routing with password validation for private rooms
+- `utils/usernameStorage.ts` - Username persistence utility with localStorage and URL parameter support
 
 ### Key Data Flow
 
@@ -114,6 +115,14 @@ REACT_APP_SERVER_URL=http://localhost:3001
 - **Real-time Updates**: Password changes broadcast immediately to all room participants
 - **Security**: Server-side password validation prevents unauthorized access
 
+### Username Persistence
+- **Automatic Caching**: Usernames saved to localStorage and restored on page refresh
+- **URL Parameter Override**: Testing support with `?username=TestUser` for multi-user development
+- **Smart Cache Logic**: URL parameters don't override saved cache (preserves normal UX)
+- **Clear Username**: "Change" button properly clears both state and localStorage
+- **Error Handling**: Graceful fallback if localStorage is disabled or unavailable
+- **Zero UI Impact**: No visual changes between development and production builds
+
 ### Ticket UI
 - **Newest First**: New tickets appear at top of list
 - **Always-Visible Controls**: Edit/delete buttons available to all users; play button for hosts only
@@ -134,5 +143,15 @@ REACT_APP_SERVER_URL=http://localhost:3001
 - **React Router Integration**: Full URL-based navigation with shareable room links
 - **Error Handling**: Toast notifications for invalid rooms with automatic redirect
 - **Leave Room Fix**: Resolved race conditions and phantom user issues
+- **Username Caching**: Usernames automatically saved to localStorage for persistence
+- **Testing Support**: Use URL parameter `?username=TestUser` to override cached username for multi-user testing
 - Don't ever run npm start, I will do that myself and test changes there
 - You can run npm run build to check for build errors though
+
+### Local Testing with Multiple Users
+
+For testing multiple users locally:
+1. **Primary user**: Use normal tab (will use cached username)
+2. **Additional users**: Add `?username=Alice` to URL for different usernames  
+3. **Alternative**: Use incognito windows (each has separate localStorage)
+4. **Username override**: `http://localhost:3000/room/abc123?username=TestUser`

@@ -14,7 +14,7 @@ export const RoomRoute: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { socket, roomId: socketRoomId } = useSocket();
-    const { username, setShowUsernameInput } = useUsername();
+    const { username, clearUsername } = useUsername();
     const [roomExists, setRoomExists] = useState<boolean | null>(null);
     const [isLeaving, setIsLeaving] = useState(false);
     const [needsPassword, setNeedsPassword] = useState(false);
@@ -330,7 +330,7 @@ export const RoomRoute: React.FC = () => {
                     <div className="username-display">
                         <span className="username-label">Username:</span>
                         <span className="username-value">{username}</span>
-                        <button className="change-username-btn" onClick={() => setShowUsernameInput(true)}>
+                        <button className="change-username-btn" onClick={clearUsername}>
                             Change
                         </button>
                     </div>

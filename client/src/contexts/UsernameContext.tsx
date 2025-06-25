@@ -1,8 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getCachedUsername, saveCachedUsername, clearCachedUsername, isUsernameFromUrl } from '../utils/usernameStorage';
 
 interface UsernameContextType {
     username: string;
     setUsername: (username: string) => void;
+    clearUsername: () => void;
     showUsernameInput: boolean;
     setShowUsernameInput: (show: boolean) => void;
 }
@@ -22,13 +24,41 @@ interface UsernameProviderProps {
 }
 
 export const UsernameProvider: React.FC<UsernameProviderProps> = ({ children }) => {
-    const [username, setUsername] = useState<string>('');
+    const [username, setUsernameState] = useState<string>('');
     const [showUsernameInput, setShowUsernameInput] = useState<boolean>(true);
+
+    // Initialize username from cache/URL on mount
+    useEffect(() => {
+        const cachedUsername = getCachedUsername();
+        if (cachedUsername) {
+            setUsernameState(cachedUsername);
+            setShowUsernameInput(false);
+        }
+    }, []);
+
+    // Enhanced setUsername that also saves to localStorage
+    const setUsername = (newUsername: string) => {
+        const trimmedUsername = newUsername.trim();
+        setUsernameState(trimmedUsername);
+        
+        // Only save to localStorage if not from URL parameter (to avoid overriding cache during testing)
+        if (trimmedUsername && !isUsernameFromUrl()) {
+            saveCachedUsername(trimmedUsername);
+        }
+    };
+
+    // Clear username and show input modal
+    const clearUsername = () => {
+        setUsernameState('');
+        clearCachedUsername();
+        setShowUsernameInput(true);
+    };
 
     return (
         <UsernameContext.Provider value={{
             username,
             setUsername,
+            clearUsername,
             showUsernameInput,
             setShowUsernameInput
         }}>
