@@ -7,6 +7,7 @@ interface UsernameContextType {
     clearUsername: () => void;
     showUsernameInput: boolean;
     setShowUsernameInput: (show: boolean) => void;
+    isLoading: boolean;
 }
 
 const UsernameContext = createContext<UsernameContextType | undefined>(undefined);
@@ -25,15 +26,35 @@ interface UsernameProviderProps {
 
 export const UsernameProvider: React.FC<UsernameProviderProps> = ({ children }) => {
     const [username, setUsernameState] = useState<string>('');
-    const [showUsernameInput, setShowUsernameInput] = useState<boolean>(true);
+    const [showUsernameInput, setShowUsernameInput] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     // Initialize username from cache/URL on mount
     useEffect(() => {
-        const cachedUsername = getCachedUsername();
-        if (cachedUsername) {
-            setUsernameState(cachedUsername);
-            setShowUsernameInput(false);
-        }
+        const initializeUsername = async () => {
+            const startTime = Date.now();
+            const MINIMUM_LOADING_TIME = 500; // 500ms minimum loading duration
+            
+            // Check for cached username
+            const cachedUsername = getCachedUsername();
+            if (cachedUsername) {
+                setUsernameState(cachedUsername);
+                setShowUsernameInput(false);
+            } else {
+                setShowUsernameInput(true);
+            }
+            
+            // Calculate remaining time to reach minimum loading duration
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = Math.max(0, MINIMUM_LOADING_TIME - elapsedTime);
+            
+            // Wait for remaining time to ensure consistent 500ms loading experience
+            await new Promise(resolve => setTimeout(resolve, remainingTime));
+            
+            setIsLoading(false);
+        };
+
+        initializeUsername();
     }, []);
 
     // Enhanced setUsername that also saves to localStorage
@@ -60,7 +81,8 @@ export const UsernameProvider: React.FC<UsernameProviderProps> = ({ children }) 
             setUsername,
             clearUsername,
             showUsernameInput,
-            setShowUsernameInput
+            setShowUsernameInput,
+            isLoading
         }}>
             {children}
         </UsernameContext.Provider>
