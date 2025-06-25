@@ -37,10 +37,12 @@ This is a **real-time planning poker application** built with a React frontend a
   - `LobbyView.tsx` - Waiting room with integrated room list
   - `RoomView.tsx` - Main planning poker interface with three-column layout
   - `TaskList.tsx` - Task management sidebar with CRUD operations
-  - `RoomList.tsx` - Active rooms display with create/join functionality
+  - `RoomList.tsx` - Active rooms display with create/join functionality and private room creation
+  - `RoomSettings.tsx` - Comprehensive settings modal for hosts (Jira + password management)
   - `ConnectionStatus.tsx` - Real-time connection indicator
   - `CardDeck.tsx` - Planning poker cards for voting
   - `UsernameInput.tsx` - Username entry modal
+  - `routes/RoomRoute.tsx` - Room URL routing with password validation for private rooms
 
 ### Key Data Flow
 
@@ -52,7 +54,8 @@ This is a **real-time planning poker application** built with a React frontend a
 ### Socket Events
 
 Main events handled in server/src/index.ts:
-- Room lifecycle: `createRoom`, `joinRoom`, `leaveRoom`
+- Room lifecycle: `createRoom`, `joinRoom`, `leaveRoom`, `checkRoomExists`
+- Private rooms: `validateRoomPassword`, `updateRoomPassword`
 - Voting: `vote`, `votesUpdated`, `startVoting`, `revealVotes`, `resetVoting`, `finalizeEstimate`
 - Ticket management: `createTask`, `updateTask`, `deleteTask`, `setCurrentTask`
 - Host management: `transferHost`, `hostChanged`
@@ -100,7 +103,16 @@ REACT_APP_SERVER_URL=http://localhost:3001
 - **Per-Room Configuration**: Each room has its own Jira base URL setting
 - **Conditional Linking**: Ticket IDs become clickable links only when URL is configured
 - **Auto-normalization**: URLs automatically get trailing slash if missing
-- **Host-Only Settings**: Gear icon in ticket list for Jira configuration
+- **Host-Only Settings**: Gear icon in room header for Jira configuration
+
+### Private Rooms
+- **Password Protection**: Rooms can be created as private with password requirements
+- **Server-side Filtering**: Private rooms filtered from public room lists automatically
+- **Direct URL Access**: Private rooms accessible via direct links with password validation
+- **Host Password Management**: Comprehensive settings modal for viewing/modifying passwords
+- **Copy Link Feature**: Room ID button in header copies shareable room URL to clipboard
+- **Real-time Updates**: Password changes broadcast immediately to all room participants
+- **Security**: Server-side password validation prevents unauthorized access
 
 ### Ticket UI
 - **Newest First**: New tickets appear at top of list

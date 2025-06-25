@@ -18,6 +18,26 @@ app.use(express.json());
 
 const roomManager = new RoomManager();
 
+// Helper function to build room state
+const buildRoomState = (roomId: string) => {
+    const users = roomManager.getRoomUsers(roomId);
+    const hostId = roomManager.getHostId(roomId);
+    const tasks = roomManager.getTasks(roomId);
+    const currentTask = roomManager.getCurrentTask(roomId);
+    const jiraBaseUrl = roomManager.getJiraBaseUrl(roomId);
+    const roomPrivacy = roomManager.getRoomPrivacy(roomId);
+    
+    return { 
+        users, 
+        hostId, 
+        tasks, 
+        currentTaskId: currentTask?.id, 
+        jiraBaseUrl,
+        isPrivate: roomPrivacy?.isPrivate || false,
+        password: roomPrivacy?.password
+    };
+};
+
 // Basic health check endpoint
 app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
@@ -48,12 +68,7 @@ io.on('connection', (socket) => {
             socket.emit('roomCreated', data.roomId);
 
             // Send current room state
-            const users = roomManager.getRoomUsers(data.roomId);
-            const hostId = roomManager.getHostId(data.roomId);
-            const tasks = roomManager.getTasks(data.roomId);
-            const currentTask = roomManager.getCurrentTask(data.roomId);
-            const jiraBaseUrl = roomManager.getJiraBaseUrl(data.roomId);
-            const roomState = { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl };
+            const roomState = buildRoomState(data.roomId);
             
             // Send to the creating socket first
             socket.emit('roomState', roomState);
@@ -80,15 +95,11 @@ io.on('connection', (socket) => {
                 socket.to(data.roomId).emit('userJoined', { id: socket.id, username: data.username });
 
                 // Send current room state
-                const users = roomManager.getRoomUsers(data.roomId);
-                const hostId = roomManager.getHostId(data.roomId);
-                const tasks = roomManager.getTasks(data.roomId);
-                const currentTask = roomManager.getCurrentTask(data.roomId);
+                const roomState = buildRoomState(data.roomId);
                 const sessionState = roomManager.getSessionState(data.roomId);
-                const jiraBaseUrl = roomManager.getJiraBaseUrl(data.roomId);
                 
-                console.log(`Server: Broadcasting room state to room ${data.roomId} - ${users.length} users:`, users.map(u => `${u.username}(${u.id})`));
-                io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
+                console.log(`Server: Broadcasting room state to room ${data.roomId} - ${roomState.users.length} users:`, roomState.users.map(u => `${u.username}(${u.id})`));
+                io.to(data.roomId).emit('roomState', roomState);
                 
                 // Send current votes and session state to the new user
                 const votes = roomManager.getRoomVotes(data.roomId);
@@ -114,12 +125,8 @@ io.on('connection', (socket) => {
             io.to(data.roomId).emit('usernameUpdated', { id: socket.id, username: data.username });
 
             // Send updated room state
-            const users = roomManager.getRoomUsers(data.roomId);
-            const hostId = roomManager.getHostId(data.roomId);
-            const tasks = roomManager.getTasks(data.roomId);
-            const currentTask = roomManager.getCurrentTask(data.roomId);
-            const jiraBaseUrl = roomManager.getJiraBaseUrl(data.roomId);
-            io.to(data.roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
+            const roomState = buildRoomState(data.roomId);
+            io.to(data.roomId).emit('roomState', roomState);
 
             // Broadcast updated room list
             broadcastRoomList();
@@ -148,12 +155,10 @@ io.on('connection', (socket) => {
             if (room.length > 0) {
                 const hostId = roomManager.getHostId(roomId);
                 if (hostId) {
-                    const tasks = roomManager.getTasks(roomId);
-                    const currentTask = roomManager.getCurrentTask(roomId);
-                    const jiraBaseUrl = roomManager.getJiraBaseUrl(roomId);
                     console.log(`Server: Broadcasting updated room state to ${room.length} users in room ${roomId}`);
                     console.log(`Server: Emitting roomState to room ${roomId}`);
-                    io.to(roomId).emit('roomState', { users: room, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
+                    const roomState = buildRoomState(roomId);
+                    io.to(roomId).emit('roomState', roomState);
                     console.log(`Server: Emitting hostChanged to room ${roomId}`);
                     io.to(roomId).emit('hostChanged', hostId);
                 }
@@ -280,19 +285,15 @@ io.on('connection', (socket) => {
 
     socket.on('getRoomState', ({ roomId }: { roomId: string }) => {
         console.log(`Server: getRoomState requested for room ${roomId} by socket ${socket.id}`);
-        const users = roomManager.getRoomUsers(roomId);
-        const hostId = roomManager.getHostId(roomId);
-        const tasks = roomManager.getTasks(roomId);
-        const currentTask = roomManager.getCurrentTask(roomId);
+        const roomState = buildRoomState(roomId);
         const sessionState = roomManager.getSessionState(roomId);
-        const jiraBaseUrl = roomManager.getJiraBaseUrl(roomId);
         const votes = roomManager.getRoomVotes(roomId);
         
-        console.log(`Server: Room ${roomId} has ${users.length} users:`, users);
+        console.log(`Server: Room ${roomId} has ${roomState.users.length} users:`, roomState.users);
         
-        if (users.length > 0) { // Only send state if room exists and has users
+        if (roomState.users.length > 0) { // Only send state if room exists and has users
             console.log(`Server: Sending room state for room ${roomId}`);
-            socket.emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
+            socket.emit('roomState', roomState);
             socket.emit('votesUpdated', votes);
             if (sessionState) {
                 socket.emit('sessionStateUpdated', sessionState);
@@ -310,6 +311,10 @@ io.on('connection', (socket) => {
     socket.on('updateRoomPassword', ({ roomId, password }) => {
         if (roomManager.updateRoomPassword(roomId, socket.id, password)) {
             socket.emit('roomPasswordUpdated', { success: true });
+            
+            // Broadcast updated room state to all users in the room
+            const roomState = buildRoomState(roomId);
+            io.to(roomId).emit('roomState', roomState);
         } else {
             socket.emit('roomPasswordUpdated', { success: false, error: 'Unauthorized or room not found' });
         }
@@ -329,12 +334,10 @@ io.on('connection', (socket) => {
             
             if (users.length > 0) {
                 // Room still has users, broadcast updated state
+                const roomState = buildRoomState(roomId);
                 const hostId = roomManager.getHostId(roomId);
-                const tasks = roomManager.getTasks(roomId);
-                const currentTask = roomManager.getCurrentTask(roomId);
-                const jiraBaseUrl = roomManager.getJiraBaseUrl(roomId);
                 
-                io.to(roomId).emit('roomState', { users, hostId, tasks, currentTaskId: currentTask?.id, jiraBaseUrl });
+                io.to(roomId).emit('roomState', roomState);
                 
                 // If host changed, notify about that too
                 if (hostId) {

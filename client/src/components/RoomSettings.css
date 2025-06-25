@@ -1,0 +1,205 @@
+/* Room Settings Button */
+.room-settings-btn {
+    background: none;
+    border: 1px solid #313244;
+    color: #cdd6f4;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.room-settings-btn:hover {
+    background: #313244;
+    border-color: #89b4fa;
+    color: #89b4fa;
+    transform: translateY(-1px);
+}
+
+/* Settings Modal */
+.settings-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.settings-modal {
+    background: #1e1e2e;
+    border: 1px solid #313244;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.settings-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #313244;
+}
+
+.settings-modal-header h3 {
+    margin: 0;
+    color: #cdd6f4;
+    font-size: 1.2rem;
+}
+
+.close-settings-btn {
+    background: none;
+    border: none;
+    color: #6c7086;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 16px;
+    transition: color 0.2s ease;
+}
+
+.close-settings-btn:hover {
+    color: #f38ba8;
+}
+
+.settings-modal-content {
+    padding: 24px;
+}
+
+/* Settings Sections */
+.settings-section {
+    margin-bottom: 32px;
+}
+
+.settings-section:last-of-type {
+    margin-bottom: 20px;
+}
+
+.settings-section h4 {
+    margin: 0 0 16px 0;
+    color: #cdd6f4;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.setting-item {
+    margin-bottom: 16px;
+}
+
+.setting-item label {
+    display: block;
+    margin-bottom: 8px;
+    color: #cdd6f4;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.setting-item input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #313244;
+    border-radius: 8px;
+    background: #181825;
+    color: #cdd6f4;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.setting-item input:focus {
+    outline: none;
+    border-color: #89b4fa;
+}
+
+.setting-item input::placeholder {
+    color: #6c7086;
+}
+
+.setting-description {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #6c7086;
+    line-height: 1.4;
+}
+
+/* Password Input Container */
+.password-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-container input {
+    padding-right: 44px;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #6c7086;
+    cursor: pointer;
+    padding: 8px;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+    color: #cdd6f4;
+}
+
+/* Modal Actions */
+.settings-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 20px;
+    border-top: 1px solid #313244;
+}
+
+.settings-modal-actions .cancel-btn,
+.settings-modal-actions .save-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settings-modal-actions .cancel-btn {
+    background: #45475a;
+    color: #cdd6f4;
+}
+
+.settings-modal-actions .cancel-btn:hover {
+    background: #585b70;
+}
+
+.settings-modal-actions .save-btn {
+    background: #89b4fa;
+    color: white;
+}
+
+.settings-modal-actions .save-btn:hover {
+    background: #74c7ec;
+}

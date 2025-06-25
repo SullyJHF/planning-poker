@@ -162,6 +162,16 @@ export class RoomManager {
         return affectedRooms;
     }
 
+    getRoomPrivacy(roomId: string): { isPrivate: boolean; password?: string } | null {
+        const room = this.rooms.get(roomId);
+        if (!room) return null;
+        
+        return {
+            isPrivate: room.isPrivate,
+            password: room.password
+        };
+    }
+
     getRoomVotes(roomId: string): Record<string, { value: string; username: string; }> {
         const room = this.rooms.get(roomId);
         if (!room) return {};

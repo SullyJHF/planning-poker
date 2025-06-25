@@ -7,6 +7,7 @@ import { useSocket } from '../../contexts/SocketContext';
 import { useUsername } from '../../contexts/UsernameContext';
 import { RoomView } from '../RoomView';
 import { ConnectionStatus } from '../ConnectionStatus';
+import { RoomSettings } from '../RoomSettings';
 
 export const RoomRoute: React.FC = () => {
     const { roomId } = useParams<{ roomId: string }>();
@@ -19,6 +20,10 @@ export const RoomRoute: React.FC = () => {
     const [needsPassword, setNeedsPassword] = useState(false);
     const [password, setPassword] = useState('');
     const [isJoining, setIsJoining] = useState(false);
+    const [isHost, setIsHost] = useState(false);
+    const [jiraBaseUrl, setJiraBaseUrl] = useState<string>('');
+    const [isPrivateRoom, setIsPrivateRoom] = useState<boolean>(false);
+    const [roomPassword, setRoomPassword] = useState<string>('');
     
     // Check if we just created this room
     const justCreated = location.state?.justCreated === true;
@@ -97,6 +102,18 @@ export const RoomRoute: React.FC = () => {
         }
     };
 
+    const handleUpdateJiraBaseUrl = (newJiraBaseUrl: string) => {
+        if (socket && socketRoomId && isHost) {
+            socket.emit('updateJiraBaseUrl', { roomId: socketRoomId, jiraBaseUrl: newJiraBaseUrl });
+        }
+    };
+
+    const handleUpdateRoomPassword = (newPassword: string) => {
+        if (socket && socketRoomId && isHost) {
+            socket.emit('updateRoomPassword', { roomId: socketRoomId, password: newPassword });
+        }
+    };
+
     // Check if room exists when component mounts (skip if we just created it)
     useEffect(() => {
         if (!socket || !roomId) return;
@@ -149,6 +166,50 @@ export const RoomRoute: React.FC = () => {
             attemptJoinRoom();
         }
     }, [socket, roomId, username, roomExists, socketRoomId, isLeaving, needsPassword, attemptJoinRoom]);
+
+    // Listen for room state updates to get host status and room settings
+    useEffect(() => {
+        if (!socket || !socketRoomId) return;
+
+        const handleRoomState = (data: { 
+            hostId: string; 
+            jiraBaseUrl?: string;
+            isPrivate?: boolean;
+            password?: string;
+        }) => {
+            setIsHost(data.hostId === socket.id);
+            if (data.jiraBaseUrl !== undefined) {
+                setJiraBaseUrl(data.jiraBaseUrl);
+            }
+            if (data.isPrivate !== undefined) {
+                setIsPrivateRoom(data.isPrivate);
+            }
+            if (data.password !== undefined) {
+                setRoomPassword(data.password);
+            }
+        };
+
+        const handleHostChanged = (newHostId: string) => {
+            setIsHost(newHostId === socket.id);
+        };
+
+        const handleJiraBaseUrlUpdated = ({ jiraBaseUrl: newJiraBaseUrl }: { jiraBaseUrl: string }) => {
+            setJiraBaseUrl(newJiraBaseUrl);
+        };
+
+        socket.on('roomState', handleRoomState);
+        socket.on('hostChanged', handleHostChanged);
+        socket.on('jiraBaseUrlUpdated', handleJiraBaseUrlUpdated);
+
+        // Request room state immediately when listeners are set up
+        socket.emit('getRoomState', { roomId: socketRoomId });
+
+        return () => {
+            socket.off('roomState', handleRoomState);
+            socket.off('hostChanged', handleHostChanged);
+            socket.off('jiraBaseUrlUpdated', handleJiraBaseUrlUpdated);
+        };
+    }, [socket, socketRoomId]);
 
     // Note: socketRoomId will be set automatically by SocketContext when we receive roomJoined event
 
@@ -275,6 +336,14 @@ export const RoomRoute: React.FC = () => {
                     </div>
                 </div>
                 <div className="header-right">
+                    <RoomSettings
+                        isHost={isHost}
+                        jiraBaseUrl={jiraBaseUrl}
+                        isPrivateRoom={isPrivateRoom}
+                        currentPassword={roomPassword}
+                        onUpdateJiraBaseUrl={handleUpdateJiraBaseUrl}
+                        onUpdateRoomPassword={handleUpdateRoomPassword}
+                    />
                     <button 
                         className="room-id-btn" 
                         onClick={handleCopyLink}

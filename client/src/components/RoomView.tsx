@@ -48,7 +48,13 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
         console.log('RoomView: Requesting room state for room:', roomId);
         socket.emit('getRoomState', { roomId });
 
-        socket.on('roomState', (data: { users: User[]; hostId: string; tasks: Task[]; currentTaskId?: string; jiraBaseUrl?: string; }) => {
+        socket.on('roomState', (data: { 
+            users: User[]; 
+            hostId: string; 
+            tasks: Task[]; 
+            currentTaskId?: string; 
+            jiraBaseUrl?: string;
+        }) => {
             console.log('RoomView: Received room state:', {
                 userCount: data.users.length,
                 users: data.users.map(u => `${u.username}(${u.id})`),
