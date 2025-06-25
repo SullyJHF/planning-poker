@@ -18,7 +18,16 @@ export const UsernameInput: React.FC<UsernameInputProps> = ({
     useEffect(() => {
         // Focus the input field when the component mounts
         inputRef.current?.focus();
-    }, []);
+        // Also select all text for easy replacement when editing existing username
+        if (initialUsername) {
+            inputRef.current?.select();
+        }
+    }, [initialUsername]);
+
+    // Update username state when initialUsername prop changes
+    useEffect(() => {
+        setUsername(initialUsername);
+    }, [initialUsername]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

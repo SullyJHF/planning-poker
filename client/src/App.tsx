@@ -10,7 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
 function AppContent() {
-    const { setUsername, showUsernameInput, setShowUsernameInput, isLoading } = useUsername();
+    const { username, setUsername, showUsernameInput, setShowUsernameInput, isLoading } = useUsername();
 
     const handleUsernameSubmit = (newUsername: string) => {
         setUsername(newUsername);
@@ -40,7 +40,10 @@ function AppContent() {
                 <div className="username-overlay">
                     <div className="username-modal">
                         <h2>Enter Your Username</h2>
-                        <UsernameInput onSubmit={handleUsernameSubmit} />
+                        <UsernameInput 
+                            onSubmit={handleUsernameSubmit} 
+                            initialUsername={username}
+                        />
                     </div>
                 </div>
             )}
