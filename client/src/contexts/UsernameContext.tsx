@@ -62,16 +62,18 @@ export const UsernameProvider: React.FC<UsernameProviderProps> = ({ children }) 
         const trimmedUsername = newUsername.trim();
         setUsernameState(trimmedUsername);
         
+        // Always clear the old cached username first, then save the new one
         // Only save to localStorage if not from URL parameter (to avoid overriding cache during testing)
         if (trimmedUsername && !isUsernameFromUrl()) {
+            clearCachedUsername(); // Clear old value first
             saveCachedUsername(trimmedUsername);
         }
     };
 
-    // Clear username and show input modal
+    // Show username input modal (for changing username)
     const clearUsername = () => {
-        setUsernameState('');
-        clearCachedUsername();
+        // Don't clear the username state yet - keep it for pre-filling the modal
+        // Only clear localStorage and show modal
         setShowUsernameInput(true);
     };
 
