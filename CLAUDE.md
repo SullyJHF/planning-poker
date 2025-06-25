@@ -147,6 +147,7 @@ REACT_APP_SERVER_URL=http://localhost:3001
 - **Testing Support**: Use URL parameter `?username=TestUser` to override cached username for multi-user testing
 - Don't ever run npm start, I will do that myself and test changes there
 - You can run npm run build to check for build errors though
+- **Always ask before committing any code**
 
 ### Local Testing with Multiple Users
 

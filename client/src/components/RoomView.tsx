@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCrown, faLink } from '@fortawesome/free-solid-svg-icons';
 import { useSocket } from '../contexts/SocketContext';
@@ -29,6 +29,7 @@ interface EstimationResult {
 
 export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> = ({ username, onLeaveRoom }) => {
     const { socket, roomId } = useSocket();
+    const previousUsernameRef = useRef(username);
     const [selectedCard, setSelectedCard] = useState<CardValue>();
     const [votes, setVotes] = useState<Record<string, Vote>>({});
     const [users, setUsers] = useState<User[]>([]);
@@ -115,6 +116,14 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
             setJiraBaseUrl(newJiraBaseUrl);
         });
 
+        socket.on('usernameUpdated', ({ id, username }: { id: string; username: string }) => {
+            setUsers(prevUsers => 
+                prevUsers.map(user => 
+                    user.id === id ? { ...user, username } : user
+                )
+            );
+        });
+
         return () => {
             socket.off('roomState');
             socket.off('votesUpdated');
@@ -123,8 +132,31 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
             socket.off('sessionStateUpdated');
             socket.off('estimationResult');
             socket.off('jiraBaseUrlUpdated');
+            socket.off('usernameUpdated');
         };
     }, [socket, sessionPhase, roomId]);
+
+    // Handle username changes and broadcast to other users
+    useEffect(() => {
+        if (socket && roomId && username && previousUsernameRef.current !== username) {
+            console.log('Username changed, emitting updateUsername:', { 
+                roomId, 
+                oldUsername: previousUsernameRef.current, 
+                newUsername: username 
+            });
+            socket.emit('updateUsername', { roomId, username });
+            
+            // Update the ref to the new username
+            previousUsernameRef.current = username;
+            
+            // Also update the local user's username in the users list immediately
+            setUsers(prevUsers => 
+                prevUsers.map(user => 
+                    user.id === socket.id ? { ...user, username } : user
+                )
+            );
+        }
+    }, [socket, roomId, username]);
 
     const handleSelectCard = (value: CardValue) => {
         if (socket && roomId) {
