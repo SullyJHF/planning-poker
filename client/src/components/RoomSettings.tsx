@@ -2,13 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faCog, 
-    faTimes, 
     faSave, 
     faEye, 
     faEyeSlash,
     faLock,
     faLockOpen
 } from '@fortawesome/free-solid-svg-icons';
+import { CloseButton } from './CloseButton';
 import './RoomSettings.css';
 
 interface RoomSettingsProps {
@@ -93,9 +93,7 @@ export const RoomSettings: React.FC<RoomSettingsProps> = ({
                     <div className="settings-modal">
                         <div className="settings-modal-header">
                             <h3>Room Settings</h3>
-                            <button className="close-settings-btn" onClick={handleCancel}>
-                                <FontAwesomeIcon icon={faTimes} />
-                            </button>
+                            <CloseButton onClick={handleCancel} />
                         </div>
                         
                         <div className="settings-modal-content">

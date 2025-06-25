@@ -2,12 +2,13 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLock, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { useSocket } from '../../contexts/SocketContext';
 import { useUsername } from '../../contexts/UsernameContext';
 import { RoomView } from '../RoomView';
 import { ConnectionStatus } from '../ConnectionStatus';
 import { RoomSettings } from '../RoomSettings';
+import { CloseButton } from '../CloseButton';
 
 export const RoomRoute: React.FC = () => {
     const { roomId } = useParams<{ roomId: string }>();
@@ -257,9 +258,7 @@ export const RoomRoute: React.FC = () => {
                                         <FontAwesomeIcon icon={faLock} />
                                         <h3>Private Room</h3>
                                     </div>
-                                    <button className="close-btn" onClick={handlePasswordCancel}>
-                                        <FontAwesomeIcon icon={faTimes} />
-                                    </button>
+                                    <CloseButton onClick={handlePasswordCancel} />
                                 </div>
                                 <div className="password-modal-content">
                                     <p>This room is password protected. Please enter the password to join.</p>

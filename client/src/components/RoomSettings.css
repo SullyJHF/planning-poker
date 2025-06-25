@@ -61,19 +61,6 @@
     font-size: 1.2rem;
 }
 
-.close-settings-btn {
-    background: none;
-    border: none;
-    color: #6c7086;
-    cursor: pointer;
-    padding: 4px;
-    font-size: 16px;
-    transition: color 0.2s ease;
-}
-
-.close-settings-btn:hover {
-    color: #f38ba8;
-}
 
 .settings-modal-content {
     padding: 24px;

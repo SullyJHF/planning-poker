@@ -1,37 +1,86 @@
 .username-form {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    align-items: center;
-    margin: 1rem 0;
+    gap: 0;
 }
 
-.username-form input {
-    padding: 0.5rem;
-    font-size: 1rem;
-    border: 2px solid #61dafb;
-    border-radius: 4px;
-    background-color: #282c34;
-    color: white;
-    width: 200px;
+/* Username Section */
+.username-section {
+    margin-bottom: 32px;
 }
 
-.username-form input:focus {
+.username-item {
+    margin-bottom: 16px;
+}
+
+.username-item label {
+    display: block;
+    margin-bottom: 8px;
+    color: #cdd6f4;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.username-item input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #313244;
+    border-radius: 8px;
+    background: #181825;
+    color: #cdd6f4;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.username-item input:focus {
     outline: none;
-    border-color: #4fa8c7;
+    border-color: #89b4fa;
 }
 
-.username-form button {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    background-color: #61dafb;
+.username-item input::placeholder {
+    color: #6c7086;
+}
+
+/* Modal Actions */
+.username-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 20px;
+    border-top: 1px solid #313244;
+}
+
+.username-modal-actions .cancel-btn,
+.username-modal-actions .submit-btn {
+    padding: 10px 20px;
     border: none;
-    border-radius: 4px;
-    color: #282c34;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
-.username-form button:hover {
-    background-color: #4fa8c7;
+.username-modal-actions .cancel-btn {
+    background: #45475a;
+    color: #cdd6f4;
+}
+
+.username-modal-actions .cancel-btn:hover {
+    background: #585b70;
+}
+
+.username-modal-actions .submit-btn {
+    background: #89b4fa;
+    color: white;
+}
+
+.username-modal-actions .submit-btn:hover {
+    background: #74c7ec;
+}
+
+.username-modal-actions .submit-btn:disabled {
+    background: #585b70;
+    cursor: not-allowed;
 } 

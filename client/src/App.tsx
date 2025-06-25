@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import { SocketProvider } from './contexts/SocketContext';
 import { UsernameProvider, useUsername } from './contexts/UsernameContext';
 import { UsernameInput } from './components/UsernameInput';
+import { CloseButton } from './components/CloseButton';
 import { LobbyRoute } from './components/routes/LobbyRoute';
 import { RoomRoute } from './components/routes/RoomRoute';
 import 'react-toastify/dist/ReactToastify.css';
@@ -39,11 +40,17 @@ function AppContent() {
             {showUsernameInput && (
                 <div className="username-overlay">
                     <div className="username-modal">
-                        <h2>Enter Your Username</h2>
-                        <UsernameInput 
-                            onSubmit={handleUsernameSubmit} 
-                            initialUsername={username}
-                        />
+                        <div className="username-modal-header">
+                            <h3>Enter Your Username</h3>
+                            <CloseButton onClick={() => setShowUsernameInput(false)} />
+                        </div>
+                        <div className="username-modal-content">
+                            <UsernameInput 
+                                onSubmit={handleUsernameSubmit} 
+                                initialUsername={username}
+                                onCancel={() => setShowUsernameInput(false)}
+                            />
+                        </div>
                     </div>
                 </div>
             )}

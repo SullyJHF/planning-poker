@@ -120,19 +120,32 @@
 }
 
 .username-modal {
-  background-color: #282c34;
-  padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-  max-width: 400px;
+  background: #1e1e2e;
+  border: 1px solid #313244;
+  border-radius: 12px;
   width: 90%;
+  max-width: 450px;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
-.username-modal h2 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: white;
-  font-size: 1.5rem;
+.username-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #313244;
+}
+
+.username-modal-header h3 {
+  margin: 0;
+  color: #cdd6f4;
+  font-size: 1.2rem;
+}
+
+
+.username-modal-content {
+  padding: 24px;
 }
 
 .lobby-title-row {

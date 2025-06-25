@@ -3,12 +3,14 @@ import './UsernameInput.css';
 
 interface UsernameInputProps {
     onSubmit: (username: string) => void;
+    onCancel?: () => void;
     initialUsername?: string;
     buttonText?: string;
 }
 
 export const UsernameInput: React.FC<UsernameInputProps> = ({
     onSubmit,
+    onCancel,
     initialUsername = '',
     buttonText = 'Submit'
 }) => {
@@ -38,17 +40,33 @@ export const UsernameInput: React.FC<UsernameInputProps> = ({
 
     return (
         <form className="username-form" onSubmit={handleSubmit}>
-            <input
-                ref={inputRef}
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
-                required
-                minLength={2}
-                maxLength={20}
-            />
-            <button type="submit">{buttonText}</button>
+            <div className="username-section">
+                <div className="username-item">
+                    <label htmlFor="username-input">Username</label>
+                    <input
+                        id="username-input"
+                        ref={inputRef}
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Enter your username"
+                        required
+                        minLength={2}
+                        maxLength={20}
+                    />
+                </div>
+            </div>
+            
+            <div className="username-modal-actions">
+                {onCancel && (
+                    <button type="button" className="cancel-btn" onClick={onCancel}>
+                        Cancel
+                    </button>
+                )}
+                <button type="submit" className="submit-btn">
+                    {buttonText}
+                </button>
+            </div>
         </form>
     );
 }; 
