@@ -324,8 +324,8 @@ The application currently supports:
   - Docker Compose orchestration for full-stack deployment
   - Environment-based configuration management
 - **Production Optimization**:
-  - Nginx reverse proxy for client static files and API routing
-  - SSL/TLS certificate management with Let's Encrypt
+  - Traefik integration with proper labels for routing
+  - SSL/TLS certificate management via Traefik + Let's Encrypt
   - Health checks and container restart policies
   - Resource limits and performance monitoring
 - **Deployment Infrastructure**:
@@ -337,8 +337,8 @@ The application currently supports:
 **Implementation Plan:**
 - Create multi-stage Dockerfile for React client build
 - Create production Dockerfile for Node.js server
-- Configure Nginx reverse proxy with SSL termination
-- Set up Docker Compose with health checks and restart policies
+- Configure Docker Compose with Traefik labels for routing
+- Set up health checks and container restart policies
 - Add environment variable management
 - Create production deployment documentation
 - Set up GitHub Actions for automated builds
@@ -349,26 +349,47 @@ The application currently supports:
 **Client Container:**
 - Multi-stage build: Node.js build stage + Nginx serving stage
 - Optimized production build with asset compression
-- Security headers and HTTPS redirect configuration
-- Static file caching and gzip compression
+- Static file serving with proper caching headers
+- Traefik labels for routing (e.g., Host: planning-poker.yourdomain.com)
 
 **Server Container:**
 - Production Node.js runtime with minimal dependencies
 - Health check endpoints for container orchestration
 - Graceful shutdown handling for Socket.IO connections
 - Environment-based configuration (ports, CORS, etc.)
+- Traefik labels for API routing and WebSocket support
 
 **Infrastructure:**
-- Nginx reverse proxy for SSL termination and routing
+- Traefik integration with proper labels and networks
 - Docker networks for internal service communication
-- Volume management for persistent data and SSL certificates
-- Load balancing preparation for horizontal scaling
+- Volume management for persistent data (if needed)
+- Automatic SSL certificate management via Traefik + Let's Encrypt
 
 **Security:**
 - Non-root user execution in containers
 - Secrets management for sensitive configuration
 - Network isolation between services
 - Regular security updates in base images
+
+**Traefik Configuration:**
+- Frontend service labels for client static files
+- Backend service labels for API and WebSocket routing
+- Network configuration for Traefik discovery
+- Domain-based routing with SSL termination
+- Health check integration for service discovery
+
+**Example Docker Compose Labels:**
+```yaml
+# Client service
+- "traefik.enable=true"
+- "traefik.http.routers.planning-poker.rule=Host(`planning-poker.yourdomain.com`)"
+- "traefik.http.routers.planning-poker.tls.certresolver=letsencrypt"
+
+# Server service  
+- "traefik.enable=true"
+- "traefik.http.routers.planning-poker-api.rule=Host(`planning-poker.yourdomain.com`) && PathPrefix(`/socket.io`)"
+- "traefik.http.routers.planning-poker-api.tls.certresolver=letsencrypt"
+```
 
 **Monitoring:**
 - Container health checks and restart policies
