@@ -222,11 +222,6 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
         }
     };
 
-    const handleUpdateJiraBaseUrl = (newJiraBaseUrl: string) => {
-        if (socket && roomId && isHost) {
-            socket.emit('updateJiraBaseUrl', { roomId, jiraBaseUrl: newJiraBaseUrl });
-        }
-    };
 
     return (
         <div className="room-container">

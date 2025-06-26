@@ -100,8 +100,8 @@ export class RoomManager {
             return false;
         }
         
-        // Check password for private rooms
-        if (room.isPrivate && !this.validateRoomPassword(roomId, password)) {
+        // Check password for private rooms, but skip for the host
+        if (room.isPrivate && userId !== room.hostId && !this.validateRoomPassword(roomId, password)) {
             return false;
         }
 

@@ -162,11 +162,11 @@ export const RoomRoute: React.FC = () => {
             shouldJoin: socket && roomId && username && roomExists && !socketRoomId && !isLeaving
         });
         
-        if (socket && roomId && username && roomExists && !socketRoomId && !isLeaving && !needsPassword) {
+        if (socket && roomId && username && roomExists && !socketRoomId && !isLeaving && (!needsPassword || justCreated)) {
             console.log('RoomRoute: Emitting joinRoom event');
             attemptJoinRoom();
         }
-    }, [socket, roomId, username, roomExists, socketRoomId, isLeaving, needsPassword, attemptJoinRoom]);
+    }, [socket, roomId, username, roomExists, socketRoomId, isLeaving, needsPassword, attemptJoinRoom, justCreated]);
 
     // Listen for room state updates to get host status and room settings
     useEffect(() => {
@@ -178,6 +178,12 @@ export const RoomRoute: React.FC = () => {
             isPrivate?: boolean;
             password?: string;
         }) => {
+            console.log('RoomRoute: handleRoomState', {
+                hostId: data.hostId,
+                socketId: socket.id,
+                isHost: data.hostId === socket.id,
+                isPrivate: data.isPrivate
+            });
             setIsHost(data.hostId === socket.id);
             if (data.jiraBaseUrl !== undefined) {
                 setJiraBaseUrl(data.jiraBaseUrl);
