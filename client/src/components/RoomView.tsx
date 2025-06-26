@@ -326,7 +326,6 @@ export const RoomView: React.FC<{ username: string; onLeaveRoom: () => void; }> 
                         onUpdateTask={handleUpdateTask}
                         onDeleteTask={handleDeleteTask}
                         onSetCurrentTask={handleSetCurrentTask}
-                        onUpdateJiraBaseUrl={handleUpdateJiraBaseUrl}
                     />
                 </div>
             </div>

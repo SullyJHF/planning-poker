@@ -27,7 +27,6 @@
     font-size: 1.2rem;
 }
 
-.jira-settings-btn,
 .add-task-btn {
     border: none;
     border-radius: 50%;
@@ -39,16 +38,6 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-}
-
-.jira-settings-btn {
-    background: #6c7086;
-    color: white;
-}
-
-.jira-settings-btn:hover {
-    background: #585b70;
-    transform: scale(1.1);
 }
 
 .add-task-btn {
@@ -301,86 +290,3 @@
     color: #a6e3a1;
 }
 
-/* Jira Settings Form */
-.jira-settings-form {
-    background: #313244;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
-    border: 1px solid #45475a;
-    flex-shrink: 0;
-}
-
-.jira-settings-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #45475a;
-}
-
-.jira-settings-header h4 {
-    margin: 0;
-    color: #cdd6f4;
-    font-size: 1rem;
-}
-
-.close-settings-btn {
-    background: none;
-    border: none;
-    color: #6c7086;
-    font-size: 14px;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-
-.close-settings-btn:hover {
-    color: #cdd6f4;
-    background: rgba(108, 112, 134, 0.2);
-}
-
-.jira-settings-content label {
-    display: block;
-    color: #cdd6f4;
-    font-weight: 500;
-    margin-bottom: 6px;
-    font-size: 14px;
-}
-
-.jira-settings-content input {
-    width: 100%;
-    background: #45475a;
-    border: 1px solid #585b70;
-    border-radius: 6px;
-    padding: 8px 12px;
-    color: #cdd6f4;
-    font-size: 14px;
-    margin-bottom: 8px;
-    box-sizing: border-box;
-}
-
-.jira-settings-content input:focus {
-    outline: none;
-    border-color: #89b4fa;
-    box-shadow: 0 0 0 2px rgba(137, 180, 250, 0.2);
-}
-
-.jira-settings-content input::placeholder {
-    color: #6c7086;
-}
-
-.jira-settings-description {
-    color: #a6adc8;
-    font-size: 12px;
-    margin-bottom: 12px;
-    line-height: 1.4;
-}
-
-.jira-settings-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-}

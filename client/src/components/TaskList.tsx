@@ -8,10 +8,7 @@ import {
     faClock,
     faSpinner,
     faCheckCircle,
-    faQuestionCircle,
-    faCog,
-    faSave,
-    faTimes
+    faQuestionCircle
 } from '@fortawesome/free-solid-svg-icons';
 import './TaskList.css';
 
@@ -33,7 +30,6 @@ interface TaskListProps {
     onUpdateTask: (taskId: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => void;
     onDeleteTask: (taskId: string) => void;
     onSetCurrentTask: (taskId: string) => void;
-    onUpdateJiraBaseUrl: (jiraBaseUrl: string) => void;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
@@ -44,29 +40,11 @@ export const TaskList: React.FC<TaskListProps> = ({
     onCreateTask,
     onUpdateTask,
     onDeleteTask,
-    onSetCurrentTask,
-    onUpdateJiraBaseUrl
+    onSetCurrentTask
 }) => {
     const [showForm, setShowForm] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
-    const [showJiraSettings, setShowJiraSettings] = useState(false);
-    const [tempJiraUrl, setTempJiraUrl] = useState(jiraBaseUrl || 'https://yourcompany.atlassian.net/browse/');
-    const jiraUrlInputRef = useRef<HTMLInputElement>(null);
 
-    // Update tempJiraUrl when jiraBaseUrl prop changes
-    useEffect(() => {
-        setTempJiraUrl(jiraBaseUrl || 'https://yourcompany.atlassian.net/browse/');
-    }, [jiraBaseUrl]);
-
-    // Auto-focus and select text when settings panel opens
-    useEffect(() => {
-        if (showJiraSettings && jiraUrlInputRef.current) {
-            setTimeout(() => {
-                jiraUrlInputRef.current?.focus();
-                jiraUrlInputRef.current?.select();
-            }, 100); // Small delay to ensure the input is rendered
-        }
-    }, [showJiraSettings]);
     const [formData, setFormData] = useState<{
         ticketId: string;
         description: string;
@@ -116,17 +94,6 @@ export const TaskList: React.FC<TaskListProps> = ({
         setFormData({ ticketId: '', description: '', status: 'pending' });
     };
 
-    const handleJiraSettingsSubmit = () => {
-        // Ensure URL ends with a slash to prevent malformed URLs
-        const normalizedUrl = tempJiraUrl.trim().endsWith('/') ? tempJiraUrl.trim() : tempJiraUrl.trim() + '/';
-        onUpdateJiraBaseUrl(normalizedUrl);
-        setShowJiraSettings(false);
-    };
-
-    const handleJiraSettingsCancel = () => {
-        setTempJiraUrl(jiraBaseUrl);
-        setShowJiraSettings(false);
-    };
 
     const getStatusIcon = (status: Task['status']) => {
         switch (status) {
@@ -142,15 +109,6 @@ export const TaskList: React.FC<TaskListProps> = ({
             <div className="task-list-header">
                 <h3>Tasks</h3>
                 <div className="task-list-actions">
-                    {isHost && (
-                        <button 
-                            className="jira-settings-btn"
-                            onClick={() => setShowJiraSettings(true)}
-                            title="Configure Jira settings"
-                        >
-                            <FontAwesomeIcon icon={faCog} />
-                        </button>
-                    )}
                     {!showForm && (
                         <button 
                             className="add-task-btn"
@@ -190,40 +148,6 @@ export const TaskList: React.FC<TaskListProps> = ({
                 </form>
             )}
 
-            {showJiraSettings && isHost && (
-                <div className="jira-settings-form">
-                    <div className="jira-settings-header">
-                        <h4>Jira Settings</h4>
-                        <button className="close-settings-btn" onClick={handleJiraSettingsCancel}>
-                            <FontAwesomeIcon icon={faTimes} />
-                        </button>
-                    </div>
-                    <div className="jira-settings-content">
-                        <label htmlFor="jira-base-url">Jira Base URL</label>
-                        <input
-                            ref={jiraUrlInputRef}
-                            id="jira-base-url"
-                            type="url"
-                            value={tempJiraUrl}
-                            onChange={(e) => setTempJiraUrl(e.target.value)}
-                            onFocus={(e) => e.target.select()}
-                            placeholder="https://yourcompany.atlassian.net/browse/"
-                        />
-                        <div className="jira-settings-description">
-                            Ticket IDs will be automatically appended to this URL.
-                        </div>
-                        <div className="jira-settings-actions">
-                            <button type="button" className="cancel-btn" onClick={handleJiraSettingsCancel}>
-                                Cancel
-                            </button>
-                            <button type="button" className="save-btn" onClick={handleJiraSettingsSubmit}>
-                                <FontAwesomeIcon icon={faSave} />
-                                Save
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             <div className="tasks-container">
                 {tasks.length === 0 && !showForm ? (
