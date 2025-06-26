@@ -371,24 +371,171 @@ The application currently supports:
 - Network isolation between services
 - Regular security updates in base images
 
-**Traefik Configuration:**
-- Frontend service labels for client static files
-- Backend service labels for API and WebSocket routing
-- Network configuration for Traefik discovery
-- Domain-based routing with SSL termination
-- Health check integration for service discovery
+**Traefik Integration (Existing Instance):**
+- Connect to existing Traefik network on VPS
+- Client container (nginx) serves static React build
+- Server container (Node.js) handles API and WebSocket connections
+- Traefik routes based on path: frontend for `/`, backend for `/socket.io`
+- SSL termination handled by existing Traefik + Let's Encrypt
 
-**Example Docker Compose Labels:**
+**Example Docker Compose Configuration:**
 ```yaml
-# Client service
-- "traefik.enable=true"
-- "traefik.http.routers.planning-poker.rule=Host(`planning-poker.yourdomain.com`)"
-- "traefik.http.routers.planning-poker.tls.certresolver=letsencrypt"
+version: '3.8'
 
-# Server service  
-- "traefik.enable=true"
-- "traefik.http.routers.planning-poker-api.rule=Host(`planning-poker.yourdomain.com`) && PathPrefix(`/socket.io`)"
-- "traefik.http.routers.planning-poker-api.tls.certresolver=letsencrypt"
+services:
+  planning-poker-client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.planning-poker-client.rule=Host(`planning-poker.yourdomain.com`)"
+      - "traefik.http.routers.planning-poker-client.tls=true"
+      - "traefik.http.routers.planning-poker-client.tls.certresolver=letsencrypt"
+      - "traefik.http.services.planning-poker-client.loadbalancer.server.port=80"
+
+  planning-poker-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.prod
+    environment:
+      - NODE_ENV=production
+      - CLIENT_URL=https://planning-poker.yourdomain.com
+    networks:
+      - traefik
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.planning-poker-server.rule=Host(`planning-poker.yourdomain.com`) && PathPrefix(`/socket.io`)"
+      - "traefik.http.routers.planning-poker-server.tls=true"
+      - "traefik.http.routers.planning-poker-server.tls.certresolver=letsencrypt"
+      - "traefik.http.services.planning-poker-server.loadbalancer.server.port=3001"
+
+networks:
+  traefik:
+    external: true
+  internal:
+    driver: bridge
+```
+
+**Required Dockerfile Examples:**
+
+**Client Dockerfile (client/Dockerfile.prod):**
+```dockerfile
+# Build stage
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+
+# Production stage
+FROM nginx:alpine
+COPY --from=builder /app/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+**Server Dockerfile (server/Dockerfile.prod):**
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+EXPOSE 3001
+USER node
+CMD ["node", "dist/index.js"]
+```
+
+**Nginx Configuration (client/nginx.conf):**
+```nginx
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    # Gzip compression
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+    
+    server {
+        listen 80;
+        server_name localhost;
+        root /usr/share/nginx/html;
+        index index.html;
+        
+        # Security headers
+        add_header X-Frame-Options DENY;
+        add_header X-Content-Type-Options nosniff;
+        add_header X-XSS-Protection "1; mode=block";
+        
+        # Static file caching
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+            expires 1y;
+            add_header Cache-Control "public, no-transform";
+        }
+        
+        # React Router (handle client-side routing)
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+    }
+}
+```
+
+**Integration Notes:**
+- Ensure your existing Traefik has a network named `traefik`
+- The `external: true` network connects to your existing Traefik instance
+- Update `planning-poker.yourdomain.com` to your actual domain
+- Ensure your Traefik instance has the same `certresolver` name (commonly `letsencrypt`)
+- Server container needs `/socket.io` path prefix for Socket.IO to work correctly
+
+**Your Existing Traefik Requirements:**
+```yaml
+# In your existing Traefik configuration, ensure:
+# 1. Docker provider is enabled
+# 2. Network named 'traefik' exists
+# 3. Let's Encrypt certificate resolver is configured
+
+# Example traefik.yml snippet:
+providers:
+  docker:
+    network: traefik
+    exposedByDefault: false
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: your-email@domain.com
+      storage: /letsencrypt/acme.json
+      httpChallenge:
+        entryPoint: web
+```
+
+**Deployment Commands:**
+```bash
+# 1. Clone the repository on your VPS
+git clone <your-repo> planning-poker
+cd planning-poker
+
+# 2. Create production environment file
+echo "NODE_ENV=production" > .env
+echo "CLIENT_URL=https://planning-poker.yourdomain.com" >> .env
+
+# 3. Deploy with Docker Compose
+docker-compose -f docker-compose.prod.yml up -d
+
+# 4. Check logs
+docker-compose -f docker-compose.prod.yml logs -f
 ```
 
 **Monitoring:**
