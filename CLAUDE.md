@@ -145,9 +145,41 @@ REACT_APP_SERVER_URL=http://localhost:3001
 - **Leave Room Fix**: Resolved race conditions and phantom user issues
 - **Username Caching**: Usernames automatically saved to localStorage for persistence
 - **Testing Support**: Use URL parameter `?username=TestUser` to override cached username for multi-user testing
+- **Consistent UI Design System**: Unified Button and IconButton components with centralized styling
+- **Reusable Components**: AppHeader and UsernameDisplay components for consistency across views
+- **Enhanced UX**: Keyboard shortcuts, better error handling, and improved toast positioning
+- **Host Privileges**: Room hosts bypass password requirements for their own private rooms
 - Don't ever run npm start, I will do that myself and test changes there
 - You can run npm run build to check for build errors though
 - **Always ask before committing any code**
+
+## UI Component System
+
+### Button Components
+The application uses a consistent button system with two main components:
+
+**Button Component (`Button.tsx`)**
+- **Variants**: `primary`, `secondary`, `danger`, `success`, `outline`, `ghost`
+- **Sizes**: `small`, `medium`, `large`
+- **Features**: Icon support, consistent styling, hover effects, disabled states
+- **Usage**: For text buttons with optional icons
+
+**IconButton Component (`IconButton.tsx`)**
+- **Variants**: `primary`, `secondary`, `danger`, `success`, `warning`, `outline`, `ghost`
+- **Sizes**: `small` (24px), `medium` (32px), `large` (40px)
+- **Features**: Perfect circles, scale hover effects, consistent icon sizing
+- **Usage**: For icon-only buttons (add, edit, delete, etc.)
+
+### Reusable Components
+**UsernameDisplay Component (`UsernameDisplay.tsx`)**
+- **Variants**: `header` (default), `compact` (for lobby)
+- **Features**: Consistent username display with change button across all views
+
+**AppHeader Component (`AppHeader.tsx`)**
+- **Variants**: `lobby`, `room`
+- **Features**: Unified header experience with flexible right content
+- **Lobby**: Clean header without background, centered content
+- **Room**: Structured header with three-column layout
 
 ### Local Testing with Multiple Users
 
