@@ -92,7 +92,9 @@ deploy() {
     # Check container status
     if docker-compose -f docker-compose.prod.yml --env-file .env.production ps | grep -q "Up"; then
         log_success "Production deployment successful!"
-        log_info "Application should be available at: https://$(grep DOMAIN .env.production | cut -d= -f2)"
+        # Load domain for display
+        DOMAIN=$(grep "^DOMAIN=" .env.production | cut -d= -f2 | sed 's/[[:space:]]*$//')
+        log_info "Application should be available at: https://${DOMAIN}"
     else
         log_error "Deployment failed. Check container logs:"
         docker-compose -f docker-compose.prod.yml --env-file .env.production logs
@@ -104,35 +106,46 @@ deploy() {
 deploy_local() {
     log_info "Starting local deployment (no Traefik)..."
     
-    # Load environment variables
+    # Environment variables will be loaded via --env-file flag
     if [ -f ".env.local" ]; then
-        log_info "Loading environment variables from .env.local..."
-        export $(cat .env.local | grep -v '^#' | xargs)
+        log_info "Using environment variables from .env.local..."
     fi
     
     # Stop existing containers if running
     log_info "Stopping existing local containers..."
-    docker-compose -f docker-compose.local.yml down --remove-orphans || true
+    docker-compose -f docker-compose.local.yml --env-file .env.local down --remove-orphans || true
     
     # Build and start containers
     log_info "Building and starting local containers..."
-    docker-compose -f docker-compose.local.yml up -d --build
+    docker-compose -f docker-compose.local.yml --env-file .env.local up -d --build
     
     # Wait for containers to be healthy
     log_info "Waiting for containers to be healthy..."
     sleep 10
     
     # Check container status
-    if docker-compose -f docker-compose.local.yml ps | grep -q "Up"; then
+    if docker-compose -f docker-compose.local.yml --env-file .env.local ps | grep -q "Up"; then
         log_success "Local deployment successful!"
+        # Load environment variables for display
+        if [ -f ".env.local" ]; then
+            LOCAL_HOST=$(grep "^LOCAL_HOST=" .env.local | cut -d= -f2 | sed 's/[[:space:]]*$//')
+            CLIENT_PORT=$(grep "^CLIENT_PORT=" .env.local | cut -d= -f2 | sed 's/[[:space:]]*$//')
+            SERVER_PORT=$(grep "^SERVER_PORT=" .env.local | cut -d= -f2 | sed 's/[[:space:]]*$//')
+        fi
+        
+        # Use defaults if not found
+        LOCAL_HOST=${LOCAL_HOST:-localhost}
+        CLIENT_PORT=${CLIENT_PORT:-8080}
+        SERVER_PORT=${SERVER_PORT:-8081}
+        
         log_info "Application is available at:"
-        log_info "  Frontend: http://localhost:8080"
-        log_info "  Backend:  http://localhost:8081"
+        log_info "  Frontend: http://${LOCAL_HOST}:${CLIENT_PORT}"
+        log_info "  Backend:  http://${LOCAL_HOST}:${SERVER_PORT}"
         log_info ""
-        log_info "To test the application, open your browser to: http://localhost:8080"
+        log_info "To test the application, open your browser to: http://${LOCAL_HOST}:${CLIENT_PORT}"
     else
         log_error "Local deployment failed. Check container logs:"
-        docker-compose -f docker-compose.local.yml logs
+        docker-compose -f docker-compose.local.yml --env-file .env.local logs
         exit 1
     fi
 }
@@ -146,7 +159,7 @@ show_logs() {
 # Show logs (local)
 show_logs_local() {
     log_info "Showing local application logs..."
-    docker-compose -f docker-compose.local.yml logs -f
+    docker-compose -f docker-compose.local.yml --env-file .env.local logs -f
 }
 
 # Stop the application (production)
@@ -159,7 +172,7 @@ stop() {
 # Stop the application (local)
 stop_local() {
     log_info "Stopping local application..."
-    docker-compose -f docker-compose.local.yml down
+    docker-compose -f docker-compose.local.yml --env-file .env.local down
     log_success "Local application stopped"
 }
 
@@ -173,7 +186,7 @@ restart() {
 # Restart the application (local)
 restart_local() {
     log_info "Restarting local application..."
-    docker-compose -f docker-compose.local.yml restart
+    docker-compose -f docker-compose.local.yml --env-file .env.local restart
     log_success "Local application restarted"
 }
 
@@ -200,14 +213,14 @@ show_help() {
     echo
     echo "Examples:"
     echo "  $0 deploy         # Deploy to production with Traefik"
-    echo "  $0 local          # Deploy locally for testing (http://localhost:8080)"
+    echo "  $0 local          # Deploy locally for testing"
     echo "  $0 logs           # Show production logs"
     echo "  $0 logs-local     # Show local logs"
     echo "  $0 stop-local     # Stop local containers"
     echo
-    echo "Local deployment uses:"
-    echo "  - Frontend: http://localhost:8080"
-    echo "  - Backend:  http://localhost:8081"
+    echo "Local deployment configuration:"
+    echo "  - Set LOCAL_HOST in .env.local to your Docker host IP"
+    echo "  - Default ports: 8080 (frontend), 8081 (backend)"
     echo "  - No SSL/Traefik required"
 }
 

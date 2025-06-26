@@ -5,7 +5,12 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile.prod
-    container_name: planning-poker-client
+      args:
+        - REACT_APP_SERVER_URL=https://${DOMAIN}
+        - HTTP_PROXY=${HTTP_PROXY}
+        - HTTPS_PROXY=${HTTPS_PROXY}
+        - NO_PROXY=${NO_PROXY}
+    container_name: ${CLIENT_CONTAINER_NAME:-planning-poker-client}
     restart: unless-stopped
     networks:
       - traefik
@@ -26,13 +31,17 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile.prod
-    container_name: planning-poker-server
+      args:
+        - HTTP_PROXY=${HTTP_PROXY}
+        - HTTPS_PROXY=${HTTPS_PROXY}
+        - NO_PROXY=${NO_PROXY}
+    container_name: ${SERVER_CONTAINER_NAME:-planning-poker-server}
     restart: unless-stopped
     environment:
-      - NODE_ENV=production
-      - PORT=3001
-      - CLIENT_URL=https://${DOMAIN}
-      - CORS_ORIGIN=https://${DOMAIN}
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${PORT:-3001}
+      - CLIENT_URL=${CLIENT_URL}
+      - CORS_ORIGIN=${CORS_ORIGIN}
     networks:
       - traefik
       - internal

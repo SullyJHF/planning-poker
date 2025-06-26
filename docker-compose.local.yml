@@ -6,31 +6,38 @@ services:
       context: ./client
       dockerfile: Dockerfile.prod
       args:
-        - REACT_APP_SERVER_URL=http://localhost:8081
-    container_name: planning-poker-client-local
+        - REACT_APP_SERVER_URL=${SERVER_URL}
+        - HTTP_PROXY=${HTTP_PROXY}
+        - HTTPS_PROXY=${HTTPS_PROXY}
+        - NO_PROXY=${NO_PROXY}
+    container_name: ${CLIENT_CONTAINER_NAME:-planning-poker-client-local}
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "${CLIENT_PORT:-8080}:80"
     networks:
       - local
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV:-production}
 
   planning-poker-server:
     build:
       context: ./server
       dockerfile: Dockerfile.prod
-    container_name: planning-poker-server-local
+      args:
+        - HTTP_PROXY=${HTTP_PROXY}
+        - HTTPS_PROXY=${HTTPS_PROXY}
+        - NO_PROXY=${NO_PROXY}
+    container_name: ${SERVER_CONTAINER_NAME:-planning-poker-server-local}
     restart: unless-stopped
     ports:
-      - "8081:3001"
-    environment:
-      - NODE_ENV=production
-      - PORT=3001
-      - CLIENT_URL=http://localhost:8080
-      - CORS_ORIGIN=http://localhost:8080
+      - "${SERVER_PORT:-8081}:${PORT:-3001}"
     networks:
       - local
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${PORT:-3001}
+      - CLIENT_URL=${CLIENT_URL}
+      - CORS_ORIGIN=${CORS_ORIGIN}
     depends_on:
       - planning-poker-client
 

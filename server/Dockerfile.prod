@@ -3,6 +3,14 @@ FROM node:18-alpine
 # Create app directory
 WORKDIR /app
 
+# Accept proxy build arguments for VPN/corporate environments
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
+ENV HTTP_PROXY=$HTTP_PROXY
+ENV HTTPS_PROXY=$HTTPS_PROXY
+ENV NO_PROXY=$NO_PROXY
+
 # Copy package files
 COPY package*.json ./
 

@@ -153,6 +153,35 @@ REACT_APP_SERVER_URL=http://localhost:3001
 - You can run npm run build to check for build errors though
 - **Always ask before committing any code**
 
+## Docker Deployment
+
+### Environment Configuration
+The application supports both local and production Docker deployments with environment variable management:
+
+**Local Deployment:**
+- Use `./deploy.sh local` for local Docker testing
+- Configuration via `.env.local` file (copied from `.env.local.example`)
+- Set `LOCAL_HOST` to your Docker host IP (localhost for standard setups, machine IP for corporate networks)
+- Supports VPN/proxy environments with HTTP_PROXY configuration
+
+**Production Deployment:**
+- Use `./deploy.sh deploy` for production deployment with Traefik
+- Configuration via `.env.production` file (copied from `.env.production.example`)
+- Requires domain configuration and Traefik integration
+- SSL/TLS certificate management via Let's Encrypt
+
+**Key Environment Variables:**
+- `LOCAL_HOST`: Docker host IP for local deployment (e.g., localhost or 172.30.193.32)
+- `DOMAIN`: Production domain for Traefik routing
+- `CLIENT_URL/CORS_ORIGIN`: Application URLs for CORS configuration
+- `HTTP_PROXY/HTTPS_PROXY/NO_PROXY`: Corporate network proxy support
+
+### Docker Architecture
+- **Client Container**: Multi-stage build (Node.js + nginx) for optimized React production build
+- **Server Container**: Production Node.js runtime with health checks and security hardening
+- **Networking**: Bridge networking for local, Traefik integration for production
+- **Security**: Non-root users, proper CORS configuration, security headers via Traefik
+
 ## UI Component System
 
 ### Button Components
