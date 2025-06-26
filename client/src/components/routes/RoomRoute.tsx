@@ -53,9 +53,19 @@ export const RoomRoute: React.FC = () => {
         socket.emit('joinRoom', { roomId, username, password: passwordAttempt });
         
         // Listen for join failure (room needs password or wrong password)
-        const handleJoinFailure = () => {
+        const handleJoinFailure = (error: any) => {
             setIsJoining(false);
-            setNeedsPassword(true);
+            
+            // Handle different error types
+            if (error && typeof error === 'object' && error.type === 'roomNotFound') {
+                // Room doesn't exist - redirect to lobby
+                toast.error(`Room "${roomId}" does not exist or has been closed.`);
+                navigate('/', { replace: true });
+            } else {
+                // Password required or invalid
+                setNeedsPassword(true);
+            }
+            
             socket.off('roomJoined', handleJoinSuccess);
             socket.off('error', handleJoinFailure);
         };
@@ -70,7 +80,7 @@ export const RoomRoute: React.FC = () => {
         
         socket.once('roomJoined', handleJoinSuccess);
         socket.once('error', handleJoinFailure);
-    }, [socket, roomId, username]);
+    }, [socket, roomId, username, navigate]);
 
     const handlePasswordSubmit = () => {
         if (password.trim()) {

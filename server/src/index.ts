@@ -86,6 +86,13 @@ io.on('connection', (socket) => {
         try {
             console.log(`Server: joinRoom attempt - roomId: ${data.roomId}, username: ${data.username}, socket: ${socket.id}`);
             
+            // Check if room exists first
+            if (!roomManager.roomExists(data.roomId)) {
+                console.log(`Server: Room ${data.roomId} does not exist`);
+                socket.emit('error', { type: 'roomNotFound', message: 'Room not found' });
+                return;
+            }
+
             if (roomManager.joinRoom(data.roomId, socket.id, data.username, data.password)) {
                 socket.join(data.roomId);
                 console.log(`Server: User ${data.username} successfully joined room: ${data.roomId}`);
@@ -111,8 +118,8 @@ io.on('connection', (socket) => {
                 // Broadcast updated room list
                 broadcastRoomList();
             } else {
-                console.log(`Server: Failed to join room ${data.roomId} - room may not exist`);
-                socket.emit('error', 'Room not found');
+                console.log(`Server: Failed to join room ${data.roomId} - password required or invalid`);
+                socket.emit('error', { type: 'passwordRequired', message: 'Password required or invalid' });
             }
         } catch (error) {
             socket.emit('error', 'Failed to join room');
