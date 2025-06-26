@@ -10,6 +10,8 @@ import {
     faCheckCircle,
     faQuestionCircle
 } from '@fortawesome/free-solid-svg-icons';
+import { IconButton } from './IconButton';
+import { Button } from './Button';
 import './TaskList.css';
 
 export interface Task {
@@ -110,13 +112,12 @@ export const TaskList: React.FC<TaskListProps> = ({
                 <h3>Tasks</h3>
                 <div className="task-list-actions">
                     {!showForm && (
-                        <button 
-                            className="add-task-btn"
+                        <IconButton 
+                            icon={faPlus}
+                            variant="primary"
                             onClick={() => setShowForm(true)}
                             title="Add new task"
-                        >
-                            <FontAwesomeIcon icon={faPlus} />
-                        </button>
+                        />
                     )}
                 </div>
             </div>
@@ -138,12 +139,12 @@ export const TaskList: React.FC<TaskListProps> = ({
                         rows={3}
                     />
                     <div className="form-actions">
-                        <button type="submit" className="save-btn">
+                        <Button type="submit" variant="success" size="small">
                             {editingTask ? 'Update' : 'Add'}
-                        </button>
-                        <button type="button" className="cancel-btn" onClick={handleCancel}>
+                        </Button>
+                        <Button type="button" variant="secondary" size="small" onClick={handleCancel}>
                             Cancel
-                        </button>
+                        </Button>
                     </div>
                 </form>
             )}
@@ -181,28 +182,28 @@ export const TaskList: React.FC<TaskListProps> = ({
                                 </span>
                                 <div className="task-actions">
                                     {isHost && task.status !== 'in_progress' && (
-                                        <button
-                                            className="select-task-btn"
+                                        <IconButton
+                                            icon={faPlay}
+                                            variant="success"
+                                            size="small"
                                             onClick={() => onSetCurrentTask(task.id)}
                                             title="Select this task"
-                                        >
-                                            <FontAwesomeIcon icon={faPlay} />
-                                        </button>
+                                        />
                                     )}
-                                    <button
-                                        className="edit-task-btn"
+                                    <IconButton
+                                        icon={faEdit}
+                                        variant="warning"
+                                        size="small"
                                         onClick={() => handleEdit(task)}
                                         title="Edit task"
-                                    >
-                                        <FontAwesomeIcon icon={faEdit} />
-                                    </button>
-                                    <button
-                                        className="delete-task-btn"
+                                    />
+                                    <IconButton
+                                        icon={faTrashAlt}
+                                        variant="danger"
+                                        size="small"
                                         onClick={() => onDeleteTask(task.id)}
                                         title="Delete task"
-                                    >
-                                        <FontAwesomeIcon icon={faTrashAlt} />
-                                    </button>
+                                    />
                                 </div>
                             </div>
                             {task.description && (

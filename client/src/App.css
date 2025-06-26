@@ -26,85 +26,9 @@
   overflow: hidden;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
+/* Old header styles removed - now using AppHeader component */
 
-.header-left h1 {
-  margin: 0;
-  color: #cdd6f4;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.header-center {
-  display: flex;
-  align-items: center;
-}
-
-.username-display {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.username-label {
-  color: #a6adc8;
-  font-size: 14px;
-}
-
-.username-value {
-  color: #cdd6f4;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.change-username-btn {
-  padding: 4px 8px;
-  font-size: 12px;
-  background: #89b4fa;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.change-username-btn:hover {
-  background: #74c7ec;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.header-right .room-id {
-  color: #a6adc8;
-  font-size: 14px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 6px 12px;
-  border-radius: 6px;
-}
-
-.header-right .leave-room-btn {
-  padding: 6px 12px;
-  font-size: 14px;
-  background: #f38ba8;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  height: auto;
-}
-
-.header-right .leave-room-btn:hover {
-  background: #eba0ac;
-}
+/* Old leave-room-btn styles removed - now using Button component */
 
 .username-overlay {
   position: fixed;
@@ -148,12 +72,7 @@
   padding: 24px;
 }
 
-.lobby-title-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  justify-content: center;
-}
+/* Old lobby-title-row styles removed - now using AppHeader component */
 
 .lobby-header-actions {
   display: flex;
@@ -349,49 +268,7 @@
   cursor: not-allowed;
 }
 
-/* Room ID Button */
-.room-id-btn {
-  background: none;
-  border: 1px solid #313244;
-  color: #cdd6f4;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  margin-right: 12px;
-}
-
-.room-id-btn:hover {
-  background: #313244;
-  border-color: #89b4fa;
-  color: #89b4fa;
-  transform: translateY(-1px);
-}
-
-.room-settings-btn {
-  background: none;
-  border: 1px solid #313244;
-  color: #cdd6f4;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  margin-right: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: auto;
-  min-width: 40px;
-}
-
-.room-settings-btn:hover {
-  background: #313244;
-  border-color: #89b4fa;
-  color: #89b4fa;
-  transform: translateY(-1px);
-}
+/* Old button styles removed - now using Button and IconButton components */
 
 .loading-overlay {
   position: fixed;

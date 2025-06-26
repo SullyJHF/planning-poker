@@ -9,6 +9,8 @@ import { RoomView } from '../RoomView';
 import { ConnectionStatus } from '../ConnectionStatus';
 import { RoomSettings } from '../RoomSettings';
 import { CloseButton } from '../CloseButton';
+import { Button } from '../Button';
+import { AppHeader } from '../AppHeader';
 
 export const RoomRoute: React.FC = () => {
     const { roomId } = useParams<{ roomId: string }>();
@@ -280,20 +282,20 @@ export const RoomRoute: React.FC = () => {
                                         />
                                     </div>
                                     <div className="password-modal-actions">
-                                        <button 
-                                            className="cancel-btn" 
+                                        <Button 
+                                            variant="secondary" 
                                             onClick={handlePasswordCancel}
                                             disabled={isJoining}
                                         >
                                             Cancel
-                                        </button>
-                                        <button 
-                                            className="join-btn" 
+                                        </Button>
+                                        <Button 
+                                            variant="primary" 
                                             onClick={handlePasswordSubmit}
                                             disabled={!password.trim() || isJoining}
                                         >
                                             {isJoining ? 'Joining...' : 'Join Room'}
-                                        </button>
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
@@ -326,41 +328,36 @@ export const RoomRoute: React.FC = () => {
     // Show room view when everything is ready
     return (
         <div className="App">
-            <header className="App-header">
-                <div className="header-left">
-                    <h1>Planning Poker</h1>
-                    <ConnectionStatus />
-                </div>
-                <div className="header-center">
-                    <div className="username-display">
-                        <span className="username-label">Username:</span>
-                        <span className="username-value">{username}</span>
-                        <button className="change-username-btn" onClick={clearUsername}>
-                            Change
-                        </button>
-                    </div>
-                </div>
-                <div className="header-right">
-                    <RoomSettings
-                        isHost={isHost}
-                        jiraBaseUrl={jiraBaseUrl}
-                        isPrivateRoom={isPrivateRoom}
-                        currentPassword={roomPassword}
-                        onUpdateJiraBaseUrl={handleUpdateJiraBaseUrl}
-                        onUpdateRoomPassword={handleUpdateRoomPassword}
-                    />
-                    <button 
-                        className="room-id-btn" 
-                        onClick={handleCopyLink}
-                        title="Click to copy room link"
-                    >
-                        Room ID: {roomId}
-                    </button>
-                    <button className="leave-room-btn" onClick={handleLeaveRoom}>
-                        Leave Room
-                    </button>
-                </div>
-            </header>
+            <AppHeader 
+                username={username}
+                onChangeUsername={clearUsername}
+                variant="room"
+                rightContent={
+                    <>
+                        <RoomSettings
+                            isHost={isHost}
+                            jiraBaseUrl={jiraBaseUrl}
+                            isPrivateRoom={isPrivateRoom}
+                            currentPassword={roomPassword}
+                            onUpdateJiraBaseUrl={handleUpdateJiraBaseUrl}
+                            onUpdateRoomPassword={handleUpdateRoomPassword}
+                        />
+                        <Button 
+                            variant="outline" 
+                            onClick={handleCopyLink}
+                            title="Click to copy room link"
+                        >
+                            Room ID: {roomId}
+                        </Button>
+                        <Button 
+                            variant="danger" 
+                            onClick={handleLeaveRoom}
+                        >
+                            Leave Room
+                        </Button>
+                    </>
+                }
+            />
 
             <main className="App-content">
                 <RoomView username={username} onLeaveRoom={handleLeaveRoom} />

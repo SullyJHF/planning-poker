@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faLock, faLockOpen, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
+import { IconButton } from './IconButton';
+import { Button } from './Button';
+import { CloseButton } from './CloseButton';
 import './RoomList.css';
 
 export interface Room {
@@ -37,13 +40,12 @@ export const RoomList: React.FC<RoomListProps> = ({ rooms, onJoinRoom, onCreateR
         <div className="room-list">
             <div className="room-list-header">
                 <h3>Active Rooms</h3>
-                <button 
-                    className="create-room-btn"
+                <IconButton 
+                    icon={faPlus}
+                    variant="primary"
                     onClick={() => setShowCreateModal(true)}
                     title="Create new room"
-                >
-                    <FontAwesomeIcon icon={faPlus} />
-                </button>
+                />
             </div>
             
             <div className="rooms-container">
@@ -75,9 +77,7 @@ export const RoomList: React.FC<RoomListProps> = ({ rooms, onJoinRoom, onCreateR
                     <div className="create-room-modal">
                         <div className="modal-header">
                             <h3>Create New Room</h3>
-                            <button className="close-btn" onClick={handleCancel}>
-                                <FontAwesomeIcon icon={faTimes} />
-                            </button>
+                            <CloseButton onClick={handleCancel} />
                         </div>
                         
                         <div className="modal-content">
@@ -113,16 +113,16 @@ export const RoomList: React.FC<RoomListProps> = ({ rooms, onJoinRoom, onCreateR
                             )}
 
                             <div className="modal-actions">
-                                <button className="cancel-btn" onClick={handleCancel}>
+                                <Button variant="secondary" onClick={handleCancel}>
                                     Cancel
-                                </button>
-                                <button 
-                                    className="create-btn" 
+                                </Button>
+                                <Button 
+                                    variant="primary" 
                                     onClick={handleCreateRoom}
                                     disabled={isPrivate && !password.trim()}
                                 >
                                     Create Room
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     </div>

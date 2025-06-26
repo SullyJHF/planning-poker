@@ -1,0 +1,54 @@
+/* Room header styles */
+.App-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: #1e1e2e;
+    border-bottom: 1px solid #313244;
+    min-height: 70px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Lobby header styles - no background, centered content */
+.lobby-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+    gap: 20px;
+}
+
+.lobby-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+}
+
+/* Shared title styles */
+.App-header h1,
+.lobby-header h1 {
+    margin: 0;
+    color: #cdd6f4;
+    font-size: 1.5rem;
+    font-weight: 600;
+}

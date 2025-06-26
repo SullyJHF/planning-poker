@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Button } from './Button';
 import './UsernameInput.css';
 
 interface UsernameInputProps {
@@ -59,13 +60,13 @@ export const UsernameInput: React.FC<UsernameInputProps> = ({
             
             <div className="username-modal-actions">
                 {onCancel && (
-                    <button type="button" className="cancel-btn" onClick={onCancel}>
+                    <Button type="button" variant="secondary" onClick={onCancel}>
                         Cancel
-                    </button>
+                    </Button>
                 )}
-                <button type="submit" className="submit-btn">
+                <Button type="submit" variant="primary">
                     {buttonText}
-                </button>
+                </Button>
             </div>
         </form>
     );

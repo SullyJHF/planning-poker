@@ -9,6 +9,8 @@ import {
     faLockOpen
 } from '@fortawesome/free-solid-svg-icons';
 import { CloseButton } from './CloseButton';
+import { IconButton } from './IconButton';
+import { Button } from './Button';
 import './RoomSettings.css';
 
 interface RoomSettingsProps {
@@ -80,13 +82,12 @@ export const RoomSettings: React.FC<RoomSettingsProps> = ({
 
     return (
         <>
-            <button 
-                className="room-settings-btn"
+            <IconButton 
+                icon={faCog}
+                variant="outline"
                 onClick={() => setShowSettings(true)}
                 title="Room settings"
-            >
-                <FontAwesomeIcon icon={faCog} />
-            </button>
+            />
 
             {showSettings && (
                 <div className="settings-modal-overlay">
@@ -165,13 +166,12 @@ export const RoomSettings: React.FC<RoomSettingsProps> = ({
 
 
                             <div className="settings-modal-actions">
-                                <button className="cancel-btn" onClick={handleCancel}>
+                                <Button variant="secondary" onClick={handleCancel}>
                                     Cancel
-                                </button>
-                                <button className="save-btn" onClick={handleSave}>
-                                    <FontAwesomeIcon icon={faSave} />
+                                </Button>
+                                <Button variant="primary" icon={faSave} onClick={handleSave}>
                                     Save Settings
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     </div>

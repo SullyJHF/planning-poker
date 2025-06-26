@@ -27,28 +27,7 @@
     font-size: 1.2rem;
 }
 
-.add-task-btn {
-    border: none;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.add-task-btn {
-    background: #89b4fa;
-    color: white;
-}
-
-.add-task-btn:hover {
-    background: #74c7ec;
-    transform: scale(1.1);
-}
+/* Old add-task-btn styles removed - now using IconButton component */
 
 .task-form {
     background: #313244;
@@ -91,33 +70,7 @@
     justify-content: flex-end;
 }
 
-.save-btn,
-.cancel-btn {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.save-btn {
-    background: #a6e3a1;
-    color: #1e1e2e;
-}
-
-.save-btn:hover {
-    background: #94d3a2;
-}
-
-.cancel-btn {
-    background: #f38ba8;
-    color: white;
-}
-
-.cancel-btn:hover {
-    background: #eba0ac;
-}
+/* Old form button styles removed - now using Button component */
 
 .tasks-container {
     flex: 1;
@@ -208,50 +161,7 @@
     transition: all 0.2s ease;
 }
 
-.select-task-btn,
-.edit-task-btn,
-.delete-task-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
-    font-size: 12px;
-    transition: all 0.2s ease;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Task action button colors */
-.select-task-btn {
-    color: #a6e3a1; /* Green for play */
-}
-
-.edit-task-btn {
-    color: #f9e2af; /* Yellow for edit */
-}
-
-.delete-task-btn {
-    color: #f38ba8; /* Red for delete */
-}
-
-.select-task-btn:hover {
-    background: rgba(137, 180, 250, 0.2);
-    transform: translateY(-1px);
-}
-
-.edit-task-btn:hover {
-    background: rgba(249, 226, 175, 0.2);
-    transform: translateY(-1px);
-}
-
-.delete-task-btn:hover {
-    background: rgba(243, 139, 168, 0.2);
-    transform: translateY(-1px);
-}
+/* Old task action button styles removed - now using IconButton component */
 
 .task-description {
     color: #a6adc8;

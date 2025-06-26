@@ -1,0 +1,137 @@
+/* Base Icon Button Styles */
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.icon-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(137, 180, 250, 0.3);
+}
+
+.icon-btn:hover:not(.icon-btn--disabled) {
+    transform: scale(1.1);
+}
+
+.icon-btn--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Icon Button Sizes */
+.icon-btn--small {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+}
+
+.icon-btn--medium {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+}
+
+.icon-btn--large {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+}
+
+/* Icon Button Variants */
+
+/* Primary - Blue theme */
+.icon-btn--primary {
+    background: #89b4fa;
+    color: white;
+    border: 1px solid #89b4fa;
+}
+
+.icon-btn--primary:hover:not(.icon-btn--disabled) {
+    background: #74c7ec;
+    border-color: #74c7ec;
+}
+
+/* Secondary - Gray theme */
+.icon-btn--secondary {
+    background: #6c7086;
+    color: white;
+    border: 1px solid #6c7086;
+}
+
+.icon-btn--secondary:hover:not(.icon-btn--disabled) {
+    background: #585b70;
+    border-color: #585b70;
+}
+
+/* Danger - Red theme */
+.icon-btn--danger {
+    background: #f38ba8;
+    color: white;
+    border: 1px solid #f38ba8;
+}
+
+.icon-btn--danger:hover:not(.icon-btn--disabled) {
+    background: #eba0ac;
+    border-color: #eba0ac;
+}
+
+/* Success - Green theme */
+.icon-btn--success {
+    background: #a6e3a1;
+    color: #1e1e2e;
+    border: 1px solid #a6e3a1;
+}
+
+.icon-btn--success:hover:not(.icon-btn--disabled) {
+    background: #94d3a2;
+    border-color: #94d3a2;
+}
+
+/* Warning - Yellow theme */
+.icon-btn--warning {
+    background: #f9e2af;
+    color: #1e1e2e;
+    border: 1px solid #f9e2af;
+}
+
+.icon-btn--warning:hover:not(.icon-btn--disabled) {
+    background: #f2d5a6;
+    border-color: #f2d5a6;
+}
+
+/* Outline - Transparent with border */
+.icon-btn--outline {
+    background: transparent;
+    color: #cdd6f4;
+    border: 1px solid #313244;
+}
+
+.icon-btn--outline:hover:not(.icon-btn--disabled) {
+    background: #313244;
+    border-color: #89b4fa;
+    color: #89b4fa;
+}
+
+/* Ghost - Completely transparent */
+.icon-btn--ghost {
+    background: transparent;
+    color: #cdd6f4;
+    border: 1px solid transparent;
+}
+
+.icon-btn--ghost:hover:not(.icon-btn--disabled) {
+    background: rgba(137, 180, 250, 0.1);
+    border-color: #89b4fa;
+    color: #89b4fa;
+}
