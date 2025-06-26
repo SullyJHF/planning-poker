@@ -106,6 +106,7 @@ export const RoomList: React.FC<RoomListProps> = ({ rooms, onJoinRoom, onCreateR
                                         type="password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleCreateRoom()}
                                         placeholder="Enter password for private room"
                                         autoFocus
                                     />

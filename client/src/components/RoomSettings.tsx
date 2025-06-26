@@ -110,6 +110,7 @@ export const RoomSettings: React.FC<RoomSettingsProps> = ({
                                         value={tempJiraUrl}
                                         onChange={(e) => setTempJiraUrl(e.target.value)}
                                         onFocus={(e) => e.target.select()}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleSave()}
                                         placeholder="https://yourcompany.atlassian.net/browse/"
                                     />
                                     <div className="setting-description">
@@ -133,6 +134,7 @@ export const RoomSettings: React.FC<RoomSettingsProps> = ({
                                                 type={showPassword ? "text" : "password"}
                                                 value={tempPassword}
                                                 onChange={(e) => setTempPassword(e.target.value)}
+                                                onKeyPress={(e) => e.key === 'Enter' && handleSave()}
                                                 placeholder="Enter room password"
                                             />
                                             <button
