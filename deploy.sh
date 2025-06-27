@@ -5,6 +5,15 @@
 
 set -e
 
+# Function to use the correct docker compose command
+docker_compose() {
+    if command -v docker-compose &> /dev/null; then
+        docker-compose "$@"
+    else
+        docker compose "$@"
+    fi
+}
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -38,8 +47,14 @@ check_dependencies() {
         exit 1
     fi
     
-    if ! command -v docker-compose &> /dev/null; then
+    # Check for both docker-compose and docker compose
+    if command -v docker-compose &> /dev/null; then
+        log_info "Found docker-compose command"
+    elif docker compose version &> /dev/null; then
+        log_info "Found docker compose plugin"
+    else
         log_error "Docker Compose is not installed. Please install Docker Compose first."
+        log_info "Either install docker-compose or ensure docker compose plugin is available"
         exit 1
     fi
     
@@ -71,33 +86,29 @@ check_env_file() {
 deploy() {
     log_info "Starting production deployment with Traefik..."
     
-    # Load environment variables
-    if [ -f ".env.production" ]; then
-        log_info "Loading environment variables from .env.production..."
-        export $(cat .env.production | grep -v '^#' | xargs)
-    fi
+    # Environment variables will be loaded via --env-file flag
     
     # Stop existing containers if running
     log_info "Stopping existing containers..."
-    docker-compose -f docker-compose.prod.yml --env-file .env.production down --remove-orphans || true
+    docker_compose -f docker-compose.prod.yml --env-file .env.production down --remove-orphans || true
     
     # Build and start containers
     log_info "Building and starting containers..."
-    docker-compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+    docker_compose -f docker-compose.prod.yml --env-file .env.production up -d --build
     
     # Wait for containers to be healthy
     log_info "Waiting for containers to be healthy..."
-    sleep 10
+    sleep 15
     
     # Check container status
-    if docker-compose -f docker-compose.prod.yml --env-file .env.production ps | grep -q "Up"; then
+    if docker_compose -f docker-compose.prod.yml --env-file .env.production ps | grep -q "Up"; then
         log_success "Production deployment successful!"
         # Load domain for display
         DOMAIN=$(grep "^DOMAIN=" .env.production | cut -d= -f2 | sed 's/[[:space:]]*$//')
         log_info "Application should be available at: https://${DOMAIN}"
     else
         log_error "Deployment failed. Check container logs:"
-        docker-compose -f docker-compose.prod.yml --env-file .env.production logs
+        docker_compose -f docker-compose.prod.yml --env-file .env.production logs
         exit 1
     fi
 }
@@ -113,18 +124,18 @@ deploy_local() {
     
     # Stop existing containers if running
     log_info "Stopping existing local containers..."
-    docker-compose -f docker-compose.local.yml --env-file .env.local down --remove-orphans || true
+    docker_compose -f docker-compose.local.yml --env-file .env.local down --remove-orphans || true
     
     # Build and start containers
     log_info "Building and starting local containers..."
-    docker-compose -f docker-compose.local.yml --env-file .env.local up -d --build
+    docker_compose -f docker-compose.local.yml --env-file .env.local up -d --build
     
     # Wait for containers to be healthy
     log_info "Waiting for containers to be healthy..."
     sleep 10
     
     # Check container status
-    if docker-compose -f docker-compose.local.yml --env-file .env.local ps | grep -q "Up"; then
+    if docker_compose -f docker-compose.local.yml --env-file .env.local ps | grep -q "Up"; then
         log_success "Local deployment successful!"
         # Load environment variables for display
         if [ -f ".env.local" ]; then
@@ -145,7 +156,7 @@ deploy_local() {
         log_info "To test the application, open your browser to: http://${LOCAL_HOST}:${CLIENT_PORT}"
     else
         log_error "Local deployment failed. Check container logs:"
-        docker-compose -f docker-compose.local.yml --env-file .env.local logs
+        docker_compose -f docker-compose.local.yml --env-file .env.local logs
         exit 1
     fi
 }
@@ -153,40 +164,40 @@ deploy_local() {
 # Show logs (production)
 show_logs() {
     log_info "Showing production application logs..."
-    docker-compose -f docker-compose.prod.yml --env-file .env.production logs -f
+    docker_compose -f docker-compose.prod.yml --env-file .env.production logs -f
 }
 
 # Show logs (local)
 show_logs_local() {
     log_info "Showing local application logs..."
-    docker-compose -f docker-compose.local.yml --env-file .env.local logs -f
+    docker_compose -f docker-compose.local.yml --env-file .env.local logs -f
 }
 
 # Stop the application (production)
 stop() {
     log_info "Stopping production application..."
-    docker-compose -f docker-compose.prod.yml --env-file .env.production down
+    docker_compose -f docker-compose.prod.yml --env-file .env.production down
     log_success "Production application stopped"
 }
 
 # Stop the application (local)
 stop_local() {
     log_info "Stopping local application..."
-    docker-compose -f docker-compose.local.yml --env-file .env.local down
+    docker_compose -f docker-compose.local.yml --env-file .env.local down
     log_success "Local application stopped"
 }
 
 # Restart the application (production)
 restart() {
     log_info "Restarting production application..."
-    docker-compose -f docker-compose.prod.yml --env-file .env.production restart
+    docker_compose -f docker-compose.prod.yml --env-file .env.production restart
     log_success "Production application restarted"
 }
 
 # Restart the application (local)
 restart_local() {
     log_info "Restarting local application..."
-    docker-compose -f docker-compose.local.yml --env-file .env.local restart
+    docker_compose -f docker-compose.local.yml --env-file .env.local restart
     log_success "Local application restarted"
 }
 

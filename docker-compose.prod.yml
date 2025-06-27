@@ -14,7 +14,6 @@ services:
     restart: unless-stopped
     networks:
       - traefik
-      - internal
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.planning-poker-client.rule=Host(`${DOMAIN}`)"
@@ -47,7 +46,7 @@ services:
       - internal
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.planning-poker-server.rule=Host(`${DOMAIN}`) && PathPrefix(`/socket.io`)"
+      - "traefik.http.routers.planning-poker-server.rule=Host(`${DOMAIN}`) && PathPrefix(`/socket.io/`)"
       - "traefik.http.routers.planning-poker-server.tls=true"
       - "traefik.http.routers.planning-poker-server.tls.certresolver=${CERT_RESOLVER:-letsencrypt}"
       - "traefik.http.services.planning-poker-server.loadbalancer.server.port=3001"
