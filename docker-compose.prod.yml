@@ -43,7 +43,6 @@ services:
       - CORS_ORIGIN=${CORS_ORIGIN}
     networks:
       - traefik
-      - internal
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.planning-poker-server.rule=Host(`${DOMAIN}`) && PathPrefix(`/socket.io/`)"
@@ -56,6 +55,3 @@ services:
 networks:
   traefik:
     external: true
-  internal:
-    driver: bridge
-    internal: true
