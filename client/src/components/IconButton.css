@@ -135,3 +135,34 @@
     border-color: #89b4fa;
     color: #89b4fa;
 }
+
+/* Mobile icon button optimizations */
+@media (max-width: 768px) {
+    /* Increase icon button sizes for better touch targets */
+    .icon-btn--small {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    .icon-btn--medium {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .icon-btn--large {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+    
+    /* Improve touch feedback */
+    .icon-btn:hover:not(.icon-btn--disabled) {
+        transform: none; /* Disable hover scale on mobile */
+    }
+    
+    .icon-btn:active:not(.icon-btn--disabled) {
+        transform: scale(0.95);
+    }
+}

@@ -10,8 +10,51 @@
     display: grid;
     grid-template-columns: 280px 1fr 320px;
     gap: 20px;
-    height: calc(100vh - 60px);
     padding: 20px 20px 20px 20px;
+}
+
+/* Desktop layout - explicit height constraint */
+@media (min-width: 769px) {
+    .room-content {
+        height: calc(100vh - 60px);
+    }
+}
+
+/* Mobile layout */
+@media (max-width: 768px) {
+    .room-container {
+        height: auto; /* Override height: 100% */
+        min-height: 100%;
+    }
+    
+    .room-content {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto; /* All sections auto-size */
+        gap: 16px;
+        padding: 16px;
+        /* Remove all height constraints - let content flow naturally */
+    }
+    
+    .left-sidebar {
+        order: 1;
+        max-height: 200px;
+    }
+    
+    .center-content {
+        order: 2;
+        min-height: 0;
+        /* Allow natural expansion - remove constraints */
+        height: auto; /* Override the height: 100% */
+        overflow: visible; /* Override overflow: hidden */
+    }
+    
+    .right-sidebar {
+        order: 3;
+        max-height: 300px;
+        overflow: hidden; /* Ensure the TaskList component handles all scrolling */
+        display: flex;
+        flex-direction: column;
+    }
 }
 
 .left-sidebar {
@@ -217,6 +260,42 @@
     color: #89b4fa;
     font-weight: 600;
     font-size: 16px;
+}
+
+/* Mobile votes section optimization */
+@media (max-width: 768px) {
+    .votes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 8px;
+    }
+    
+    .vote {
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .vote-user {
+        font-size: 12px;
+    }
+    
+    .vote-value {
+        font-size: 14px;
+        align-self: flex-end;
+    }
+    
+    .current-task-info {
+        padding: 16px;
+    }
+    
+    .current-task-info .task-title {
+        font-size: 1.2rem;
+    }
+    
+    .current-task-info .task-description {
+        font-size: 14px;
+    }
 }
 
  

@@ -152,3 +152,31 @@
 .btn:has(.btn__text:empty) {
     gap: 0;
 }
+
+/* Mobile button optimizations */
+@media (max-width: 768px) {
+    /* Increase button sizes for better touch targets */
+    .btn--small {
+        min-height: 32px;
+        padding: 8px 12px;
+    }
+    
+    .btn--medium {
+        min-height: 40px;
+        padding: 10px 16px;
+    }
+    
+    .btn--large {
+        min-height: 48px;
+        padding: 14px 24px;
+    }
+    
+    /* Improve touch feedback */
+    .btn:hover:not(.btn--disabled) {
+        transform: none; /* Disable hover transform on mobile */
+    }
+    
+    .btn:active:not(.btn--disabled) {
+        transform: scale(0.98);
+    }
+}

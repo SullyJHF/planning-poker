@@ -307,4 +307,45 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .App-header {
+    height: 50px;
+    padding: 8px 16px;
+  }
+  
+  .App-content {
+    padding-bottom: 20px; /* Default padding */
+  }
+  
+  /* Special padding for room view to account for card deck */
+  .App-content:has(.room-container) {
+    padding-bottom: 100px;
+  }
+  
+  /* Prevent iOS zoom on form inputs */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+  
+  /* Improve touch scrolling */
+  .App-content {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+  }
+  
+  /* Ensure proper viewport sizing */
+  .App {
+    height: 100vh;
+    height: 100dvh; /* Use dynamic viewport height when available */
+  }
+  
+  /* Lobby specific mobile styles */
+  .lobby-container {
+    padding: 1rem 0;
+    height: calc(100vh - 50px);
+    height: calc(100dvh - 50px);
+  }
 } 

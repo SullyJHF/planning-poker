@@ -83,4 +83,29 @@
 .username-modal-actions .submit-btn:disabled {
     background: #585b70;
     cursor: not-allowed;
+}
+
+/* Mobile username input optimizations */
+@media (max-width: 768px) {
+    .username-item input {
+        font-size: 16px; /* Prevent iOS zoom */
+        padding: 14px 12px;
+    }
+    
+    .username-modal-actions {
+        gap: 8px;
+        flex-direction: column-reverse;
+    }
+    
+    .username-modal-actions .cancel-btn,
+    .username-modal-actions .submit-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+        min-height: 44px; /* Better touch target */
+        width: 100%;
+    }
+    
+    .username-section {
+        margin-bottom: 24px;
+    }
 } 
