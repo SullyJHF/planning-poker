@@ -102,6 +102,7 @@ deploy() {
     export REACT_APP_BUILD_TIME="$BUILD_TIME"
     
     log_info "Building version: $BUILD_VERSION ($BUILD_HASH) from branch $BUILD_BRANCH"
+    log_info "Environment variables: VERSION=$REACT_APP_VERSION, HASH=$REACT_APP_BUILD_HASH, BRANCH=$REACT_APP_BUILD_BRANCH"
     
     # Stop existing containers if running
     log_info "Stopping existing containers..."
@@ -148,6 +149,7 @@ deploy_local() {
     export REACT_APP_BUILD_TIME="$BUILD_TIME"
     
     log_info "Building version: $BUILD_VERSION ($BUILD_HASH) from branch $BUILD_BRANCH"
+    log_info "Environment variables: VERSION=$REACT_APP_VERSION, HASH=$REACT_APP_BUILD_HASH, BRANCH=$REACT_APP_BUILD_BRANCH"
     
     # Environment variables will be loaded via --env-file flag
     if [ -f ".env.local" ]; then

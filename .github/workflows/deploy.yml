@@ -42,6 +42,13 @@ jobs:
       - name: Build application
         run: npm run build
 
+      - name: Extract version for deployment
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -58,13 +65,14 @@ jobs:
             export GITHUB_RUN_ID="${{ github.run_id }}"
             
             # Set version information for build
-            export REACT_APP_VERSION="$(node -p "require('./package.json').version" 2>/dev/null || echo "unknown")"
+            export REACT_APP_VERSION="${{ steps.version.outputs.version }}"
             export REACT_APP_BUILD_HASH="${{ github.sha }}"
             export REACT_APP_BUILD_BRANCH="${{ github.ref_name }}"
             export REACT_APP_BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             
             echo "🚀 Starting deployment..."
             echo "Environment: $DEPLOY_ENV"
+            echo "Version: $REACT_APP_VERSION"
             echo "Commit: $GIT_COMMIT"
             echo "Branch: $GIT_BRANCH"
             echo "Run ID: $GITHUB_RUN_ID"
