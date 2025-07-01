@@ -1,6 +1,7 @@
 import React from 'react';
 import { ConnectionStatus } from './ConnectionStatus';
 import { UsernameDisplay } from './UsernameDisplay';
+import { VersionInfo } from './VersionInfo';
 import './AppHeader.css';
 
 interface AppHeaderProps {
@@ -35,6 +36,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 </div>
                 <div className="header-right">
                     {rightContent}
+                    <VersionInfo className="header-version" />
                 </div>
             </header>
         );
@@ -44,7 +46,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         <div className={headerClass}>
             <div className="lobby-title-row">
                 <h1>Planning Poker</h1>
-                <ConnectionStatus />
+                <div className="lobby-header-right">
+                    <ConnectionStatus />
+                    <VersionInfo className="lobby-version" />
+                </div>
             </div>
             {username && (
                 <UsernameDisplay 

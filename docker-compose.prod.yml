@@ -7,6 +7,10 @@ services:
       dockerfile: Dockerfile.prod
       args:
         - REACT_APP_SERVER_URL=https://${DOMAIN}
+        - REACT_APP_VERSION=${REACT_APP_VERSION}
+        - REACT_APP_BUILD_HASH=${REACT_APP_BUILD_HASH}
+        - REACT_APP_BUILD_BRANCH=${REACT_APP_BUILD_BRANCH}
+        - REACT_APP_BUILD_TIME=${REACT_APP_BUILD_TIME}
         - HTTP_PROXY=${HTTP_PROXY}
         - HTTPS_PROXY=${HTTPS_PROXY}
         - NO_PROXY=${NO_PROXY}

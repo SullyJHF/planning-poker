@@ -19,6 +19,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Client tests: `npm run test --workspace=client`
 - Server tests: `npm run test --workspace=server`
 
+## Development Practices
+
+- Always update the package.json version number sensibly before making git commits
+
 ## Architecture Overview
 
 This is a **real-time planning poker application** built with a React frontend and Node.js backend communicating via Socket.IO.

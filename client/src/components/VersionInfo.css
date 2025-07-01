@@ -1,0 +1,85 @@
+.version-info {
+    position: relative;
+}
+
+.version-button {
+    background: none;
+    border: none;
+    color: #6c7086;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 16px;
+    line-height: 1;
+    transition: color 0.2s ease;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.version-button:hover {
+    color: #cdd6f4;
+}
+
+.version-button:focus {
+    outline: 2px solid #89b4fa;
+    outline-offset: 2px;
+}
+
+.version-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px 0;
+}
+
+.version-item:last-child {
+    margin-bottom: 0;
+}
+
+.version-label {
+    color: #a6adc8;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.version-value {
+    color: #cdd6f4;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    text-align: right;
+    word-break: break-all;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .version-modal-overlay {
+        padding: 16px;
+    }
+    
+    .version-modal {
+        max-width: 100%;
+    }
+    
+    .version-modal-header {
+        padding: 12px 16px;
+    }
+    
+    .version-modal-content {
+        padding: 16px;
+    }
+    
+    .version-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        margin-bottom: 16px;
+    }
+    
+    .version-value {
+        text-align: left;
+        word-break: break-word;
+    }
+}
