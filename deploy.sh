@@ -86,7 +86,22 @@ check_env_file() {
 deploy() {
     log_info "Starting production deployment with Traefik..."
     
-    # Environment variables will be loaded via --env-file flag
+    # Set build version information
+    log_info "Setting build version information..."
+    
+    # Get version info
+    BUILD_VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "unknown")
+    BUILD_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    BUILD_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+    BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    
+    # Export for docker-compose
+    export REACT_APP_VERSION="$BUILD_VERSION"
+    export REACT_APP_BUILD_HASH="$BUILD_HASH"
+    export REACT_APP_BUILD_BRANCH="$BUILD_BRANCH"
+    export REACT_APP_BUILD_TIME="$BUILD_TIME"
+    
+    log_info "Building version: $BUILD_VERSION ($BUILD_HASH) from branch $BUILD_BRANCH"
     
     # Stop existing containers if running
     log_info "Stopping existing containers..."
@@ -116,6 +131,23 @@ deploy() {
 # Build and deploy the application locally (no Traefik)
 deploy_local() {
     log_info "Starting local deployment (no Traefik)..."
+    
+    # Set build version information
+    log_info "Setting build version information..."
+    
+    # Get version info
+    BUILD_VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "unknown")
+    BUILD_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    BUILD_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+    BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    
+    # Export for docker-compose
+    export REACT_APP_VERSION="$BUILD_VERSION"
+    export REACT_APP_BUILD_HASH="$BUILD_HASH"
+    export REACT_APP_BUILD_BRANCH="$BUILD_BRANCH"
+    export REACT_APP_BUILD_TIME="$BUILD_TIME"
+    
+    log_info "Building version: $BUILD_VERSION ($BUILD_HASH) from branch $BUILD_BRANCH"
     
     # Environment variables will be loaded via --env-file flag
     if [ -f ".env.local" ]; then

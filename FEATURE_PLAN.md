@@ -581,7 +581,7 @@ docker-compose -f docker-compose.prod.yml logs -f
 
 ### Phase 2.5: Production Deployment (1-2 weeks) - ✅ COMPLETED
 1. **✅ Docker Production Deployment** - COMPLETED
-2. CI/CD Pipeline Setup
+2. **🎯 CI/CD Pipeline Setup** - NEXT PRIORITY
 3. Production Monitoring and Logging
 
 ### Phase 3: Advanced Features (3-4 weeks)
@@ -711,5 +711,435 @@ components/
 - **Performance**: Monitor WebSocket load with increased features
 - **Data Privacy**: Implement proper data handling for persistent features
 - **Scalability**: Plan for increased concurrent users and data storage
+
+## 13. CI/CD Pipeline Setup
+**Priority: High - NEXT PRIORITY**
+**Current Issue**: Manual deployment process requires SSH access and manual script execution on VPS.
+
+**Proposed Solution**: Automated GitHub Actions workflow for continuous deployment to VPS.
+
+### CI/CD Architecture Plan
+
+**GitHub Actions Workflow Triggers:**
+- Push to `main` branch (production deployment)
+- Manual workflow dispatch for emergency deployments
+- Optional: Push to `develop` branch (staging deployment)
+
+**Deployment Strategy:**
+1. **SSH-based deployment** to existing VPS infrastructure
+2. **Git pull + rebuild** approach using existing `deploy.sh` script
+3. **Zero-downtime deployment** with Docker container orchestration
+4. **Rollback capability** using git tags and container versioning
+
+### Technical Implementation Plan
+
+**Required GitHub Secrets:**
+```yaml
+# VPS Connection
+VPS_HOST: "your-server-ip-or-domain"
+VPS_USER: "deploy-user"  # Non-root user with Docker permissions
+VPS_SSH_KEY: "-----BEGIN OPENSSH PRIVATE KEY-----..."  # Private SSH key
+
+# Application Configuration
+DOMAIN: "planning-poker.yourdomain.com"
+DOCKER_REGISTRY: "ghcr.io"  # Optional: for container registry
+```
+
+**SSH Key Setup Requirements:**
+1. Generate dedicated deployment SSH key pair
+2. Add public key to VPS user's `~/.ssh/authorized_keys`
+3. Ensure deployment user has Docker permissions (`docker` group membership)
+4. Configure SSH key restrictions for security (command restrictions if needed)
+
+**VPS Deployment User Setup:**
+```bash
+# On VPS: Create deployment user
+sudo useradd -m -s /bin/bash deploy
+sudo usermod -aG docker deploy
+sudo mkdir -p /home/deploy/.ssh
+sudo chown deploy:deploy /home/deploy/.ssh
+sudo chmod 700 /home/deploy/.ssh
+
+# Add SSH public key to authorized_keys
+sudo nano /home/deploy/.ssh/authorized_keys
+sudo chown deploy:deploy /home/deploy/.ssh/authorized_keys
+sudo chmod 600 /home/deploy/.ssh/authorized_keys
+```
+
+**GitHub Actions Workflow Structure:**
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/deploy/planning-poker
+            git pull origin main
+            ./deploy.sh deploy
+```
+
+**Deployment Process Flow:**
+1. **Code Push**: Developer pushes to main branch
+2. **GitHub Actions Trigger**: Workflow starts automatically
+3. **SSH Connection**: Connect to VPS using stored SSH key
+4. **Code Update**: `git pull origin main` to get latest changes
+5. **Container Rebuild**: `./deploy.sh deploy` rebuilds and restarts containers
+6. **Health Check**: Verify deployment success via container status
+7. **Notification**: Send deployment status (success/failure)
+
+**Advanced Deployment Features:**
+
+**Pre-deployment Checks:**
+- Build validation (ensure code compiles)
+- Docker image build test
+- Environment variable validation
+- SSL certificate status check
+
+**Deployment Process:**
+- Backup current deployment state
+- Pull latest code changes
+- Build new Docker images
+- Rolling update with health checks
+- Automatic rollback on failure
+
+**Post-deployment Verification:**
+- Container health status
+- HTTP endpoint availability check
+- Socket.IO connection test
+- Basic functionality smoke test
+
+**Security Considerations:**
+- SSH key rotation schedule
+- Deployment user privilege limitation
+- Audit logging for deployments
+- Secrets rotation and management
+
+**Rollback Strategy:**
+```yaml
+# Emergency rollback workflow
+name: Rollback Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_hash:
+        description: 'Commit hash to rollback to'
+        required: true
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Rollback to specific commit
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/deploy/planning-poker
+            git checkout ${{ github.event.inputs.commit_hash }}
+            ./deploy.sh deploy
+```
+
+**Monitoring and Notifications:**
+- Deployment success/failure notifications (Slack, Discord, email)
+- Performance metrics collection post-deployment
+- Error rate monitoring after deployment
+- Automatic alerting for deployment issues
+
+### Implementation Steps
+
+**Phase 1: Basic CI/CD Setup**
+1. Create GitHub Actions workflow file
+2. Set up VPS deployment user and SSH keys
+3. Configure GitHub repository secrets
+4. Test basic deployment pipeline
+5. Add deployment status notifications
+
+**Phase 2: Enhanced Pipeline**
+1. Add pre-deployment validation steps
+2. Implement health checks and smoke tests
+3. Add rollback workflow capability
+4. Set up deployment monitoring
+5. Document deployment process
+
+**Phase 3: Advanced Features**
+1. Multi-environment support (staging/production)
+2. Blue-green deployment strategy
+3. Database migration automation
+4. Performance regression testing
+5. Automated security scanning
+
+### Benefits of Automated CI/CD
+
+**Developer Experience:**
+- Instant deployment on merge to main
+- Consistent deployment process
+- Reduced manual errors
+- Faster iteration cycles
+
+**Operations Benefits:**
+- Reduced downtime deployments
+- Automated rollback capability
+- Deployment audit trail
+- Standardized deployment process
+
+**Security Improvements:**
+- Automated security updates
+- Controlled access to production
+- Encrypted deployment credentials
+- Deployment approval workflows (optional)
+
+### Existing Infrastructure Integration
+
+The CI/CD pipeline leverages your existing Docker deployment infrastructure:
+- **Existing `deploy.sh` script**: No changes needed, GitHub Actions calls existing script
+- **Docker Compose setup**: Continues using current production configuration
+- **Traefik integration**: Maintains existing reverse proxy and SSL setup
+- **Environment management**: Uses existing `.env.production` configuration
+
+### Risk Mitigation
+
+**Deployment Failures:**
+- Automatic rollback on health check failure
+- Container restart policies maintain availability
+- Manual rollback workflow for emergency situations
+
+**Security Risks:**
+- SSH key rotation procedures
+- Deployment user isolation
+- Audit logging for all deployments
+- Secrets management best practices
+
+**Infrastructure Dependencies:**
+- VPS availability monitoring
+- Docker service health checks
+- Database backup before deployments
+- Network connectivity validation
+
+This CI/CD setup transforms your manual deployment process into a fully automated, reliable, and secure deployment pipeline while maintaining compatibility with your existing infrastructure.
+
+### Version Information Display
+
+**Version Display Component:**
+A subtle version information indicator in the application header that provides deployment and version details.
+
+**UI Design:**
+- **Question mark icon** (`?`) in top-right corner of header
+- **Hover tooltip** showing version information
+- **Minimal footprint** - doesn't interfere with existing UI
+- **Consistent styling** with existing IconButton component system
+
+**Version Information Displayed:**
+```
+Planning Poker v1.0.0
+Build: abc1234 (main)
+Deployed: 2024-01-15 14:30 UTC
+Environment: Production
+```
+
+**Technical Implementation:**
+
+**Build-time Version Injection:**
+```javascript
+// In client package.json build script
+"build": "REACT_APP_VERSION=$npm_package_version REACT_APP_BUILD_HASH=$(git rev-parse --short HEAD) REACT_APP_BUILD_BRANCH=$(git branch --show-current) REACT_APP_BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) react-scripts build"
+```
+
+**Environment Variables Available in React:**
+- `REACT_APP_VERSION`: From root package.json version (1.0.0)
+- `REACT_APP_BUILD_HASH`: Git commit hash (short)
+- `REACT_APP_BUILD_BRANCH`: Git branch name
+- `REACT_APP_BUILD_TIME`: ISO timestamp of build
+- `REACT_APP_ENV`: Environment (Production/Local)
+
+**VersionInfo Component:**
+```tsx
+// components/VersionInfo.tsx
+interface VersionInfoProps {
+  className?: string;
+}
+
+export const VersionInfo: React.FC<VersionInfoProps> = ({ className }) => {
+  const version = process.env.REACT_APP_VERSION || 'dev';
+  const buildHash = process.env.REACT_APP_BUILD_HASH || 'local';
+  const buildBranch = process.env.REACT_APP_BUILD_BRANCH || 'unknown';
+  const buildTime = process.env.REACT_APP_BUILD_TIME || 'unknown';
+  const environment = process.env.NODE_ENV === 'production' ? 'Production' : 'Development';
+
+  const versionText = `Planning Poker v${version}\nBuild: ${buildHash} (${buildBranch})\nBuilt: ${buildTime}\nEnvironment: ${environment}`;
+
+  return (
+    <div className={`version-info ${className || ''}`}>
+      <IconButton
+        variant="ghost"
+        size="small"
+        title={versionText}
+        className="version-button"
+      >
+        <FontAwesomeIcon icon={faQuestionCircle} />
+      </IconButton>
+    </div>
+  );
+};
+```
+
+**CSS Styling:**
+```css
+/* components/VersionInfo.css */
+.version-info {
+  position: relative;
+}
+
+.version-button {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.version-button:hover {
+  opacity: 1;
+}
+
+/* Tooltip styling for multiline text */
+.version-button[title] {
+  position: relative;
+  white-space: pre-line;
+}
+```
+
+**Integration with AppHeader:**
+```tsx
+// Update AppHeader.tsx to include VersionInfo
+<div className="header-right">
+  {rightContent}
+  <VersionInfo className="header-version" />
+</div>
+```
+
+**CI/CD Integration:**
+
+**Enhanced GitHub Actions Workflow:**
+```yaml
+# .github/workflows/deploy.yml - Updated version
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git info
+
+      - name: Deploy to VPS with version info
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /home/deploy/planning-poker
+            git pull origin main
+            
+            # Set version environment variables for build
+            export BUILD_VERSION=$(node -p "require('./package.json').version")
+            export BUILD_HASH=$(git rev-parse --short HEAD)
+            export BUILD_BRANCH=$(git branch --show-current)
+            export BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            
+            # Update .env.production with build info
+            echo "REACT_APP_VERSION=$BUILD_VERSION" >> .env.production
+            echo "REACT_APP_BUILD_HASH=$BUILD_HASH" >> .env.production
+            echo "REACT_APP_BUILD_BRANCH=$BUILD_BRANCH" >> .env.production
+            echo "REACT_APP_BUILD_TIME=$BUILD_TIME" >> .env.production
+            
+            # Deploy with version info
+            ./deploy.sh deploy
+```
+
+**Docker Build Integration:**
+```dockerfile
+# client/Dockerfile.prod - Updated with version args
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+# Accept build args for version info
+ARG REACT_APP_VERSION
+ARG REACT_APP_BUILD_HASH
+ARG REACT_APP_BUILD_BRANCH
+ARG REACT_APP_BUILD_TIME
+
+# Set environment variables
+ENV REACT_APP_VERSION=$REACT_APP_VERSION
+ENV REACT_APP_BUILD_HASH=$REACT_APP_BUILD_HASH
+ENV REACT_APP_BUILD_BRANCH=$REACT_APP_BUILD_BRANCH
+ENV REACT_APP_BUILD_TIME=$REACT_APP_BUILD_TIME
+
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+
+# Production stage remains the same
+FROM nginx:alpine
+COPY --from=builder /app/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+**Updated deploy.sh Integration:**
+```bash
+# Add to deploy.sh before docker-compose commands
+log_info "Setting build version information..."
+
+# Get version info
+BUILD_VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "unknown")
+BUILD_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+BUILD_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+# Export for docker-compose
+export REACT_APP_VERSION="$BUILD_VERSION"
+export REACT_APP_BUILD_HASH="$BUILD_HASH"
+export REACT_APP_BUILD_BRANCH="$BUILD_BRANCH"
+export REACT_APP_BUILD_TIME="$BUILD_TIME"
+
+log_info "Building version: $BUILD_VERSION ($BUILD_HASH)"
+```
+
+**Benefits:**
+- **Deployment Tracking**: Instantly see which version is deployed
+- **Debug Information**: Build hash helps identify specific deployments
+- **Environment Verification**: Confirm production vs development builds
+- **Deployment History**: Build timestamps provide deployment timeline
+- **Git Integration**: Branch and commit info for traceability
+
+**User Experience:**
+- **Unobtrusive**: Small question mark icon doesn't interfere with UI
+- **Informative**: Hover provides comprehensive version details
+- **Consistent**: Uses existing design system components
+- **Accessible**: Proper tooltip and ARIA attributes
 
 This plan provides a roadmap for transforming the simple planning poker tool into a comprehensive estimation and collaboration platform while maintaining the simplicity and effectiveness of the current system.

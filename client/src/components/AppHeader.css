@@ -44,6 +44,17 @@
     gap: 24px;
 }
 
+.lobby-header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-version,
+.lobby-version {
+    margin-left: 8px;
+}
+
 /* Shared title styles */
 .App-header h1,
 .lobby-header h1 {
