@@ -1,6 +1,6 @@
-# Planning Poker - Production Deployment Guide
+# Planning Poker - Deployment Guide
 
-This guide provides step-by-step instructions for deploying the Planning Poker application to production using Docker and Traefik.
+This guide covers automated deployment using GitHub Actions CI/CD, local testing with Docker, and production deployment using Traefik.
 
 ## Prerequisites
 
@@ -10,10 +10,177 @@ This guide provides step-by-step instructions for deploying the Planning Poker a
   - Network named `traefik`
   - Let's Encrypt certificate resolver configured
 - A domain name pointing to your server
+- GitHub repository with Actions enabled
+- SSH access to your VPS server
 
-## Quick Start
+## Table of Contents
 
-### Production Deployment (with Traefik)
+1. [GitHub Actions CI/CD](#github-actions-cicd)
+2. [Local Testing with Act](#local-testing-with-act)
+3. [Manual Docker Deployment](#manual-docker-deployment)
+4. [Architecture & Security](#architecture--security)
+5. [Troubleshooting](#troubleshooting)
+
+## GitHub Actions CI/CD
+
+The GitHub Actions workflow (`.github/workflows/deploy.yml`) provides automated deployment to your VPS with comprehensive testing and verification.
+
+### Required GitHub Secrets
+
+Configure these secrets in your GitHub repository settings (`Settings > Secrets and variables > Actions`):
+
+| Secret | Description | Example |
+|--------|-------------|---------|
+| `VPS_HOST` | Your VPS server IP address or hostname | `192.168.1.100` or `myserver.com` |
+| `VPS_USER` | Username for SSH connection to VPS | `deploy` |
+| `VPS_SSH_KEY` | Private SSH key for authentication | Contents of your `~/.ssh/id_rsa` file |
+| `VPS_PORT` | SSH port (optional, defaults to 22) | `22` or `2222` |
+
+### SSH Key Setup
+
+1. **Generate SSH key pair on your local machine:**
+   ```bash
+   ssh-keygen -t rsa -b 4096 -C "github-actions@planning-poker"
+   ```
+   Save as: `/home/your-user/.ssh/planning_poker_deploy`
+
+2. **Copy public key to your VPS:**
+   ```bash
+   ssh-copy-id -i ~/.ssh/planning_poker_deploy.pub deploy@your-vps-ip
+   ```
+
+3. **Add private key to GitHub secrets:**
+   ```bash
+   cat ~/.ssh/planning_poker_deploy
+   ```
+   Copy the entire content (including `-----BEGIN OPENSSH PRIVATE KEY-----` and `-----END OPENSSH PRIVATE KEY-----`) to the `VPS_SSH_KEY` secret.
+
+### VPS Server Setup
+
+1. **Create deployment user:**
+   ```bash
+   sudo adduser deploy
+   sudo usermod -aG docker deploy
+   sudo mkdir -p /home/deploy
+   sudo chown deploy:deploy /home/deploy
+   ```
+
+2. **Install required software:**
+   ```bash
+   # Docker & Docker Compose
+   sudo apt update
+   sudo apt install docker.io docker-compose git -y
+   sudo systemctl enable docker
+   sudo systemctl start docker
+   ```
+
+3. **Configure deployment directory:**
+   ```bash
+   sudo -u deploy mkdir -p /home/deploy/planning-poker
+   sudo -u deploy git clone https://github.com/YOUR_USERNAME/planning-poker.git /home/deploy/planning-poker
+   ```
+
+### Workflow Features
+
+- **Automatic Deployment:** Triggers on pushes to `main` branch
+- **Manual Deployment:** Use workflow dispatch with environment selection (production/staging)
+- **Testing:** Runs full test suite before deployment
+- **Build Verification:** Ensures application builds successfully
+- **Container Verification:** Confirms containers are running after deployment
+- **Rollback Safety:** Maintains git history for easy rollbacks
+
+### Deployment Environments
+
+**Production Environment:**
+- Automatically deploys from `main` branch
+- Uses `./deploy.sh deploy` (production Docker configuration)
+- Requires all secrets configured
+
+**Staging Environment:**
+- Manual deployment via workflow dispatch
+- Uses `./deploy.sh local` (local Docker configuration)
+- Useful for testing before production deployment
+
+## Local Testing with Act
+
+You can test GitHub Actions workflows locally using the `act` tool before pushing to GitHub.
+
+### Installing Act
+
+**macOS (with Homebrew):**
+```bash
+brew install act
+```
+
+**Linux:**
+```bash
+curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+```
+
+**Windows:**
+```bash
+choco install act-cli
+```
+
+### Local Testing Setup
+
+1. **Create `.actrc` file in your project root:**
+   ```bash
+   echo "-P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest" > .actrc
+   ```
+
+2. **Create local secrets file (`.secrets`):**
+   ```bash
+   VPS_HOST=your-test-server-ip
+   VPS_USER=your-test-user
+   VPS_SSH_KEY="$(cat ~/.ssh/your_test_key)"
+   VPS_PORT=22
+   ```
+
+3. **Test the workflow locally:**
+   ```bash
+   # Test push event (automatic deployment)
+   act push --secret-file .secrets
+
+   # Test manual deployment with staging environment
+   act workflow_dispatch --secret-file .secrets -j deploy \
+     --input environment=staging
+
+   # Test specific job only
+   act push --secret-file .secrets -j deploy
+   ```
+
+### Local Testing Tips
+
+- **Dry Run:** Add `--dry-run` flag to see what would be executed
+- **Verbose Output:** Use `-v` flag for detailed logging
+- **Test SSH Connection:** Verify your SSH setup works before running the full workflow
+- **Container Resource:** Act uses Docker containers, ensure you have sufficient resources
+- **Network Access:** Ensure your local machine can reach your test VPS
+
+### Example Local Test Commands
+
+```bash
+# Quick syntax check
+act --list
+
+# Test with verbose output
+act push --secret-file .secrets -v
+
+# Test specific workflow
+act workflow_dispatch --secret-file .secrets \
+  --input environment=staging \
+  --job deploy
+
+# Dry run to check workflow steps
+act push --secret-file .secrets --dry-run
+```
+
+## Manual Docker Deployment
+
+### Quick Start
+
+#### Production Deployment (with Traefik)
 
 1. **Clone the repository:**
    ```bash
@@ -33,7 +200,7 @@ This guide provides step-by-step instructions for deploying the Planning Poker a
    ./deploy.sh
    ```
 
-### Local Testing (no Traefik)
+#### Local Testing (no Traefik)
 
 1. **Clone the repository:**
    ```bash
@@ -50,9 +217,9 @@ This guide provides step-by-step instructions for deploying the Planning Poker a
    - Frontend: http://localhost:8080
    - Backend: http://localhost:8081
 
-## Detailed Setup
+### Detailed Setup
 
-### 1. Environment Configuration
+#### 1. Environment Configuration
 
 Copy the example environment file and customize it:
 
@@ -79,7 +246,7 @@ TRAEFIK_NETWORK=traefik
 CERT_RESOLVER=letsencrypt
 ```
 
-### 2. Traefik Integration
+#### 2. Traefik Integration
 
 Ensure your existing Traefik configuration includes:
 
@@ -99,9 +266,9 @@ certificatesResolvers:
         entryPoint: web
 ```
 
-### 3. Deployment Options
+#### 3. Deployment Options
 
-#### Option A: Using the Deployment Script (Recommended)
+##### Option A: Using the Deployment Script (Recommended)
 
 **Production Deployment (with Traefik):**
 ```bash
@@ -133,7 +300,7 @@ certificatesResolvers:
 ./deploy.sh restart-local
 ```
 
-#### Option B: Using npm Scripts
+##### Option B: Using npm Scripts
 
 **Production (with Traefik):**
 ```bash
@@ -165,7 +332,7 @@ npm run docker:local-stop
 npm run docker:local-restart
 ```
 
-#### Option C: Using Docker Compose Directly
+##### Option C: Using Docker Compose Directly
 
 ```bash
 # Deploy
@@ -178,7 +345,7 @@ docker-compose -f docker-compose.prod.yml logs -f
 docker-compose -f docker-compose.prod.yml down
 ```
 
-## Architecture Overview
+## Architecture & Security
 
 ### Container Structure
 
@@ -229,19 +396,19 @@ docker-compose -f docker-compose.prod.yml down
 - Graceful shutdown handling
 - Resource limits (configurable)
 
-## Monitoring and Logging
+### Monitoring and Logging
 
-### Health Checks
+#### Health Checks
 - Client: HTTP check on port 80
 - Server: HTTP check on `/health` endpoint
 - Automatic container restart on health check failure
 
-### Logging
+#### Logging
 - Structured logging to stdout/stderr
 - Nginx access and error logs
 - Docker log driver integration
 
-### Monitoring Commands
+#### Monitoring Commands
 
 ```bash
 # Check container status
@@ -257,9 +424,9 @@ docker stats
 docker inspect --format='{{.State.Health.Status}}' planning-poker-client
 ```
 
-## Maintenance
+### Maintenance
 
-### Updates
+#### Updates
 
 1. **Pull latest code:**
    ```bash
@@ -271,11 +438,11 @@ docker inspect --format='{{.State.Health.Status}}' planning-poker-client
    ./deploy.sh deploy
    ```
 
-### Backup
+#### Backup
 
 No persistent data is stored by default. If you add database functionality, ensure proper backup procedures.
 
-### SSL Certificate Renewal
+#### SSL Certificate Renewal
 
 Handled automatically by Traefik + Let's Encrypt.
 
@@ -283,27 +450,71 @@ Handled automatically by Traefik + Let's Encrypt.
 
 ### Common Issues
 
-1. **Containers not starting:**
-   ```bash
-   # Check logs
-   docker-compose -f docker-compose.prod.yml logs
-   
-   # Check if Traefik network exists
-   docker network ls | grep traefik
-   ```
+#### GitHub Actions Deployment Issues
 
-2. **Domain not accessible:**
-   - Verify DNS points to your server
-   - Check Traefik labels in docker-compose.prod.yml
-   - Ensure domain matches in .env.production
+**SSH Connection Failed:**
+- Verify VPS_HOST, VPS_USER, and VPS_PORT are correct
+- Check SSH key format (must include header/footer lines)
+- Ensure public key is in VPS `~/.ssh/authorized_keys`
+- Test SSH connection manually: `ssh -i ~/.ssh/key deploy@vps-ip`
 
-3. **WebSocket connection issues:**
-   - Verify `/socket.io` path prefix routing
-   - Check CORS configuration
-   - Ensure both containers are in same network
+**Container Start Failed:**
+- Check Docker daemon is running on VPS
+- Verify environment files exist (`.env.production`)
+- Check container logs: `docker-compose logs`
+- Ensure ports are not in use
+
+**Build Failures:**
+- Check Node.js version compatibility
+- Verify dependencies install correctly
+- Run tests locally first: `npm test`
+- Check for environment-specific configuration
+
+**Git Issues:**
+- Verify repository clone succeeded
+- Check branch exists and is accessible
+- Ensure git credentials are configured
+- Verify commit SHA matches expected
+
+#### Docker Deployment Issues
+
+**Containers not starting:**
+```bash
+# Check logs
+docker-compose -f docker-compose.prod.yml logs
+
+# Check if Traefik network exists
+docker network ls | grep traefik
+```
+
+**Domain not accessible:**
+- Verify DNS points to your server
+- Check Traefik labels in docker-compose.prod.yml
+- Ensure domain matches in .env.production
+
+**WebSocket connection issues:**
+- Verify `/socket.io` path prefix routing
+- Check CORS configuration
+- Ensure both containers are in same network
 
 ### Debug Commands
 
+#### GitHub Actions Debugging
+```bash
+# Check deployment status on VPS
+ssh deploy@your-vps "cd /home/deploy/planning-poker && docker ps"
+
+# View recent deployment logs
+ssh deploy@your-vps "cd /home/deploy/planning-poker && docker-compose logs --tail=100"
+
+# Check git status on VPS
+ssh deploy@your-vps "cd /home/deploy/planning-poker && git status"
+
+# Test local act execution
+act --list --secret-file .secrets
+```
+
+#### Docker Debugging
 ```bash
 # Access client container
 docker exec -it planning-poker-client sh
@@ -330,6 +541,26 @@ docker-compose -f docker-compose.prod.yml logs -f planning-poker-server
 # All logs with timestamps
 docker-compose -f docker-compose.prod.yml logs -f -t
 ```
+
+### Security Best Practices
+
+#### SSH Key Security
+- Use separate SSH keys for GitHub Actions (never reuse personal keys)
+- Rotate SSH keys regularly
+- Use strong passphrases for key generation
+- Limit SSH key permissions on VPS (`authorized_keys` file should be 600)
+
+#### GitHub Secrets Management
+- Never commit secrets to repository
+- Use environment-specific secrets when possible
+- Regularly audit secret access and usage
+- Remove unused secrets promptly
+
+#### VPS Security
+- Keep deployment user permissions minimal
+- Use fail2ban for SSH protection
+- Regular security updates
+- Monitor deployment logs for suspicious activity
 
 ## Scaling Considerations
 
@@ -380,10 +611,23 @@ For issues or questions:
 3. Check the main README.md for application-specific information
 4. Open an issue in the project repository
 
+### Getting Help
+
+- **GitHub Actions Documentation:** https://docs.github.com/en/actions
+- **Act Documentation:** https://github.com/nektos/act
+- **Docker Compose Documentation:** https://docs.docker.com/compose/
+- **SSH Troubleshooting:** Check VPS system logs with `sudo journalctl -u sshd`
+
 ## Production Checklist
 
-Before going live:
+### GitHub Actions Setup
+- [ ] GitHub secrets configured (VPS_HOST, VPS_USER, VPS_SSH_KEY, VPS_PORT)
+- [ ] SSH keys generated and deployed to VPS
+- [ ] Deployment user created with Docker permissions
+- [ ] VPS firewall configured for SSH and HTTP/HTTPS
+- [ ] Test workflow with `act` locally
 
+### Docker Deployment Setup
 - [ ] Environment variables configured
 - [ ] Domain DNS configured
 - [ ] Traefik network accessible
@@ -393,3 +637,11 @@ Before going live:
 - [ ] Backup procedures in place (if applicable)
 - [ ] Security headers active
 - [ ] Performance optimizations enabled
+
+### Next Steps After Setup
+1. Configure GitHub secrets with your VPS credentials
+2. Test SSH connection manually to verify setup
+3. Run local test with `act` to validate workflow
+4. Create a test commit to trigger automatic deployment
+5. Monitor first deployment and verify containers are running
+6. Set up monitoring and alerting for production deployments

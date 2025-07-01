@@ -50,4 +50,11 @@ logs.md
 *.tgz
 
 # Yarn Integrity file
-.yarn-integrity 
+.yarn-integrity
+
+# GitHub Actions local testing
+.secrets
+.actrc
+
+# Claude
+settings.local.json

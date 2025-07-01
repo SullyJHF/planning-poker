@@ -1,0 +1,126 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git info
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build application
+        run: npm run build
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
+          script: |
+            # Set deployment variables
+            export DEPLOY_ENV="${{ github.event.inputs.environment || 'production' }}"
+            export GIT_COMMIT="${{ github.sha }}"
+            export GIT_BRANCH="${{ github.ref_name }}"
+            export GITHUB_RUN_ID="${{ github.run_id }}"
+            
+            echo "🚀 Starting deployment..."
+            echo "Environment: $DEPLOY_ENV"
+            echo "Commit: $GIT_COMMIT"
+            echo "Branch: $GIT_BRANCH"
+            echo "Run ID: $GITHUB_RUN_ID"
+            
+            # Navigate to project directory
+            cd /home/deploy/planning-poker || {
+              echo "❌ Project directory not found. Creating and cloning..."
+              git clone https://github.com/${{ github.repository }}.git /home/deploy/planning-poker
+              cd /home/deploy/planning-poker
+            }
+            
+            # Ensure we're on the correct branch and pull latest
+            echo "📥 Pulling latest changes..."
+            git fetch origin
+            git checkout $GIT_BRANCH
+            git reset --hard origin/$GIT_BRANCH
+            
+            # Verify we're on the expected commit
+            CURRENT_COMMIT=$(git rev-parse HEAD)
+            if [ "$CURRENT_COMMIT" != "$GIT_COMMIT" ]; then
+              echo "⚠️  Warning: Expected commit $GIT_COMMIT but got $CURRENT_COMMIT"
+              git reset --hard $GIT_COMMIT
+            fi
+            
+            # Make deploy script executable
+            chmod +x deploy.sh
+            
+            # Run deployment
+            echo "🔨 Running deployment script..."
+            if [ "$DEPLOY_ENV" = "production" ]; then
+              ./deploy.sh deploy
+            else
+              echo "ℹ️  Staging deployment - using local mode"
+              ./deploy.sh local
+            fi
+            
+            # Verify deployment
+            echo "🔍 Verifying deployment..."
+            sleep 10
+            
+            # Check if containers are running
+            if docker ps | grep -q planning-poker; then
+              echo "✅ Deployment successful! Containers are running."
+              docker ps --filter "name=planning-poker" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+            else
+              echo "❌ Deployment failed! No planning-poker containers found."
+              echo "Container logs:"
+              docker-compose -f docker-compose.prod.yml logs --tail=50
+              exit 1
+            fi
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "🎉 Deployment completed successfully!"
+          echo "Environment: ${{ github.event.inputs.environment || 'production' }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Deployed at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "💥 Deployment failed!"
+          echo "Please check the logs above for details."
+          echo "Environment: ${{ github.event.inputs.environment || 'production' }}"
+          echo "Commit: ${{ github.sha }}"
