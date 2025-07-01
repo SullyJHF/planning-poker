@@ -8,8 +8,8 @@ import { useUsername } from '../../contexts/UsernameContext';
 import { RoomView } from '../RoomView';
 import { ConnectionStatus } from '../ConnectionStatus';
 import { RoomSettings } from '../RoomSettings';
-import { CloseButton } from '../CloseButton';
 import { Button } from '../Button';
+import { Modal } from '../Modal';
 import { AppHeader } from '../AppHeader';
 
 export const RoomRoute: React.FC = () => {
@@ -269,47 +269,46 @@ export const RoomRoute: React.FC = () => {
                                 <ConnectionStatus />
                             </div>
                         </div>
-                        <div className="password-modal-overlay">
-                            <div className="password-modal">
-                                <div className="password-modal-header">
-                                    <div className="password-modal-title">
-                                        <FontAwesomeIcon icon={faLock} />
-                                        <h3>Private Room</h3>
-                                    </div>
-                                    <CloseButton onClick={handlePasswordCancel} />
+                        <Modal
+                            isOpen={true}
+                            onClose={handlePasswordCancel}
+                            title={
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <FontAwesomeIcon icon={faLock} />
+                                    Private Room
                                 </div>
-                                <div className="password-modal-content">
-                                    <p>This room is password protected. Please enter the password to join.</p>
-                                    <div className="password-input">
-                                        <input
-                                            type="password"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            placeholder="Enter room password"
-                                            autoFocus
-                                            onKeyPress={(e) => e.key === 'Enter' && handlePasswordSubmit()}
-                                            disabled={isJoining}
-                                        />
-                                    </div>
-                                    <div className="password-modal-actions">
-                                        <Button 
-                                            variant="secondary" 
-                                            onClick={handlePasswordCancel}
-                                            disabled={isJoining}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button 
-                                            variant="primary" 
-                                            onClick={handlePasswordSubmit}
-                                            disabled={!password.trim() || isJoining}
-                                        >
-                                            {isJoining ? 'Joining...' : 'Join Room'}
-                                        </Button>
-                                    </div>
-                                </div>
+                            }
+                            size="small"
+                        >
+                            <p>This room is password protected. Please enter the password to join.</p>
+                            <div className="password-input">
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Enter room password"
+                                    autoFocus
+                                    onKeyPress={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                                    disabled={isJoining}
+                                />
                             </div>
-                        </div>
+                            <div className="password-modal-actions">
+                                <Button 
+                                    variant="secondary" 
+                                    onClick={handlePasswordCancel}
+                                    disabled={isJoining}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button 
+                                    variant="primary" 
+                                    onClick={handlePasswordSubmit}
+                                    disabled={!password.trim() || isJoining}
+                                >
+                                    {isJoining ? 'Joining...' : 'Join Room'}
+                                </Button>
+                            </div>
+                        </Modal>
                     </div>
                 </main>
             </div>

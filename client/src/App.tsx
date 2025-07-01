@@ -4,9 +4,10 @@ import { ToastContainer } from 'react-toastify';
 import { SocketProvider } from './contexts/SocketContext';
 import { UsernameProvider, useUsername } from './contexts/UsernameContext';
 import { UsernameInput } from './components/UsernameInput';
-import { CloseButton } from './components/CloseButton';
+import { Modal } from './components/Modal';
 import { LobbyRoute } from './components/routes/LobbyRoute';
 import { RoomRoute } from './components/routes/RoomRoute';
+import { getCachedUsername } from './utils/usernameStorage';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
@@ -17,6 +18,18 @@ function AppContent() {
         setUsername(newUsername);
         setShowUsernameInput(false);
     };
+
+    const handleUsernameCancel = () => {
+        // Only allow cancelling if there's already a cached username
+        const cachedUsername = getCachedUsername();
+        if (cachedUsername) {
+            setShowUsernameInput(false);
+        }
+    };
+
+    // Check if user has a cached username to determine if modal can be closed
+    const hasCachedUsername = Boolean(getCachedUsername());
+    const canCloseUsernameModal = hasCachedUsername;
 
     // Show loading spinner while checking for cached username
     if (isLoading) {
@@ -37,24 +50,21 @@ function AppContent() {
                 <Route path="/room/:roomId" element={<RoomRoute />} />
             </Routes>
 
-            {showUsernameInput && (
-                <div className="username-overlay">
-                    <div className="username-modal">
-                        <div className="username-modal-header">
-                            <h3>Enter Your Username</h3>
-                            <CloseButton onClick={() => setShowUsernameInput(false)} />
-                        </div>
-                        <div className="username-modal-content">
-                            <UsernameInput 
-                                onSubmit={handleUsernameSubmit} 
-                                initialUsername={username}
-                                onCancel={() => setShowUsernameInput(false)}
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
-            
+            <Modal
+                isOpen={showUsernameInput}
+                onClose={canCloseUsernameModal ? handleUsernameCancel : undefined}
+                title="Enter Your Username"
+                size="small"
+                showCloseButton={canCloseUsernameModal}
+                allowBackdropClose={canCloseUsernameModal}
+            >
+                <UsernameInput
+                    onSubmit={handleUsernameSubmit}
+                    initialUsername={username}
+                    onCancel={canCloseUsernameModal ? handleUsernameCancel : undefined}
+                />
+            </Modal>
+
             <ToastContainer
                 position="bottom-right"
                 autoClose={5000}

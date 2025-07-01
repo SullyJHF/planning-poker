@@ -8,9 +8,9 @@ import {
     faLock,
     faLockOpen
 } from '@fortawesome/free-solid-svg-icons';
-import { CloseButton } from './CloseButton';
 import { IconButton } from './IconButton';
 import { Button } from './Button';
+import { Modal } from './Modal';
 import './RoomSettings.css';
 
 interface RoomSettingsProps {
@@ -89,15 +89,12 @@ export const RoomSettings: React.FC<RoomSettingsProps> = ({
                 title="Room settings"
             />
 
-            {showSettings && (
-                <div className="settings-modal-overlay">
-                    <div className="settings-modal">
-                        <div className="settings-modal-header">
-                            <h3>Room Settings</h3>
-                            <CloseButton onClick={handleCancel} />
-                        </div>
-                        
-                        <div className="settings-modal-content">
+            <Modal
+                isOpen={showSettings}
+                onClose={handleCancel}
+                title="Room Settings"
+                size="medium"
+            >
                             {/* Jira Settings Section */}
                             <div className="settings-section">
                                 <h4>Jira Integration</h4>
@@ -167,18 +164,15 @@ export const RoomSettings: React.FC<RoomSettingsProps> = ({
                             )}
 
 
-                            <div className="settings-modal-actions">
-                                <Button variant="secondary" onClick={handleCancel}>
-                                    Cancel
-                                </Button>
-                                <Button variant="primary" icon={faSave} onClick={handleSave}>
-                                    Save Settings
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
+                <div className="settings-modal-actions">
+                    <Button variant="secondary" onClick={handleCancel}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" icon={faSave} onClick={handleSave}>
+                        Save Settings
+                    </Button>
                 </div>
-            )}
+            </Modal>
         </>
     );
 };
