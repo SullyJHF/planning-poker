@@ -80,6 +80,26 @@ Configure these secrets in your GitHub repository settings (`Settings > Secrets 
    sudo -u deploy git clone https://github.com/YOUR_USERNAME/planning-poker.git /home/deploy/planning-poker
    ```
 
+4. **Configure environment file:**
+   ```bash
+   cd /home/deploy/planning-poker
+   sudo -u deploy cp .env.production.example .env.production
+   sudo -u deploy nano .env.production
+   ```
+   Update the following key values:
+   ```env
+   # Your domain name
+   DOMAIN=your-domain.com
+   
+   # CORS configuration - must match your domain
+   CLIENT_URL=https://your-domain.com
+   CORS_ORIGIN=https://your-domain.com
+   
+   # Production settings
+   NODE_ENV=production
+   PORT=3001
+   ```
+
 ### Workflow Features
 
 - **Automatic Deployment:** Triggers on pushes to `main` branch
@@ -460,9 +480,16 @@ Handled automatically by Traefik + Let's Encrypt.
 
 **Container Start Failed:**
 - Check Docker daemon is running on VPS
-- Verify environment files exist (`.env.production`)
+- **Verify environment files exist (`.env.production`)** - Most common issue!
+- Ensure `.env.production` is properly configured with your domain
 - Check container logs: `docker-compose logs`
 - Ensure ports are not in use
+
+**Missing Environment File:**
+- Error: `No such file or directory: .env.production`
+- Solution: Create and configure `.env.production` file in `/home/deploy/planning-poker/`
+- Copy from example: `cp .env.production.example .env.production`
+- Update domain settings to match your server
 
 **Build Failures:**
 - Check Node.js version compatibility
