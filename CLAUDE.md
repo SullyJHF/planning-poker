@@ -206,7 +206,7 @@ The application features a comprehensive automated deployment system:
 
 **Required GitHub Secrets:**
 - `VPS_HOST`: Server IP or hostname
-- `VPS_USER`: SSH username (typically `deploy`)
+- `VPS_USER`: SSH username (typically `deployer`)
 - `VPS_SSH_KEY`: Private SSH key for authentication
 - `VPS_PORT`: SSH port (optional, defaults to 22)
 

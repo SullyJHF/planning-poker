@@ -78,10 +78,10 @@ jobs:
             echo "Run ID: $GITHUB_RUN_ID"
             
             # Navigate to project directory
-            cd /home/deploy/planning-poker || {
+            cd /home/deployer/planning-poker || {
               echo "❌ Project directory not found. Creating and cloning..."
-              git clone https://github.com/${{ github.repository }}.git /home/deploy/planning-poker
-              cd /home/deploy/planning-poker
+              git clone https://github.com/${{ github.repository }}.git /home/deployer/planning-poker
+              cd /home/deployer/planning-poker
             }
             
             # Ensure we're on the correct branch and pull latest

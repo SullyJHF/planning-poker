@@ -32,7 +32,7 @@ Configure these secrets in your GitHub repository settings (`Settings > Secrets 
 | Secret | Description | Example |
 |--------|-------------|---------|
 | `VPS_HOST` | Your VPS server IP address or hostname | `192.168.1.100` or `myserver.com` |
-| `VPS_USER` | Username for SSH connection to VPS | `deploy` |
+| `VPS_USER` | Username for SSH connection to VPS | `deployer` |
 | `VPS_SSH_KEY` | Private SSH key for authentication | Contents of your `~/.ssh/id_rsa` file |
 | `VPS_PORT` | SSH port (optional, defaults to 22) | `22` or `2222` |
 
@@ -46,7 +46,7 @@ Configure these secrets in your GitHub repository settings (`Settings > Secrets 
 
 2. **Copy public key to your VPS:**
    ```bash
-   ssh-copy-id -i ~/.ssh/planning_poker_deploy.pub deploy@your-vps-ip
+   ssh-copy-id -i ~/.ssh/planning_poker_deploy.pub deployer@your-vps-ip
    ```
 
 3. **Add private key to GitHub secrets:**
@@ -59,10 +59,10 @@ Configure these secrets in your GitHub repository settings (`Settings > Secrets 
 
 1. **Create deployment user:**
    ```bash
-   sudo adduser deploy
-   sudo usermod -aG docker deploy
-   sudo mkdir -p /home/deploy
-   sudo chown deploy:deploy /home/deploy
+   sudo adduser deployer
+   sudo usermod -aG docker deployer
+   sudo mkdir -p /home/deployer
+   sudo chown deployer:deployer /home/deployer
    ```
 
 2. **Install required software:**
@@ -76,15 +76,15 @@ Configure these secrets in your GitHub repository settings (`Settings > Secrets 
 
 3. **Configure deployment directory:**
    ```bash
-   sudo -u deploy mkdir -p /home/deploy/planning-poker
-   sudo -u deploy git clone https://github.com/YOUR_USERNAME/planning-poker.git /home/deploy/planning-poker
+   sudo -u deployer mkdir -p /home/deployer/planning-poker
+   sudo -u deployer git clone https://github.com/YOUR_USERNAME/planning-poker.git /home/deployer/planning-poker
    ```
 
 4. **Configure environment file:**
    ```bash
-   cd /home/deploy/planning-poker
-   sudo -u deploy cp .env.production.example .env.production
-   sudo -u deploy nano .env.production
+   cd /home/deployer/planning-poker
+   sudo -u deployer cp .env.production.example .env.production
+   sudo -u deployer nano .env.production
    ```
    Update the following key values:
    ```env
@@ -476,7 +476,7 @@ Handled automatically by Traefik + Let's Encrypt.
 - Verify VPS_HOST, VPS_USER, and VPS_PORT are correct
 - Check SSH key format (must include header/footer lines)
 - Ensure public key is in VPS `~/.ssh/authorized_keys`
-- Test SSH connection manually: `ssh -i ~/.ssh/key deploy@vps-ip`
+- Test SSH connection manually: `ssh -i ~/.ssh/key deployer@vps-ip`
 
 **Container Start Failed:**
 - Check Docker daemon is running on VPS
@@ -487,7 +487,7 @@ Handled automatically by Traefik + Let's Encrypt.
 
 **Missing Environment File:**
 - Error: `No such file or directory: .env.production`
-- Solution: Create and configure `.env.production` file in `/home/deploy/planning-poker/`
+- Solution: Create and configure `.env.production` file in `/home/deployer/planning-poker/`
 - Copy from example: `cp .env.production.example .env.production`
 - Update domain settings to match your server
 
@@ -529,13 +529,13 @@ docker network ls | grep traefik
 #### GitHub Actions Debugging
 ```bash
 # Check deployment status on VPS
-ssh deploy@your-vps "cd /home/deploy/planning-poker && docker ps"
+ssh deployer@your-vps "cd /home/deployer/planning-poker && docker ps"
 
 # View recent deployment logs
-ssh deploy@your-vps "cd /home/deploy/planning-poker && docker-compose logs --tail=100"
+ssh deployer@your-vps "cd /home/deployer/planning-poker && docker-compose logs --tail=100"
 
 # Check git status on VPS
-ssh deploy@your-vps "cd /home/deploy/planning-poker && git status"
+ssh deployer@your-vps "cd /home/deployer/planning-poker && git status"
 
 # Test local act execution
 act --list --secret-file .secrets
