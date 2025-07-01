@@ -66,6 +66,26 @@ Main events handled in server/src/index.ts:
 - Host management: `transferHost`, `hostChanged`
 - Jira integration: `updateJiraBaseUrl`, `jiraBaseUrlUpdated`
 
+### Version Information System
+
+**VersionInfo Component:**
+- Click-based modal displaying build information in app header
+- Automatic version extraction from package.json during build process
+- Environment variables injected at Docker build time for production deployments
+
+**Build Information Displayed:**
+- Application version from package.json (e.g., "Planning Poker v1.2.0")
+- Git commit hash (shortened to 7 characters, e.g., "54f38b0")
+- Git branch name (e.g., "main")
+- Build timestamp in ISO format
+- Environment indicator (Production/Development)
+
+**Version Injection Process:**
+- GitHub Actions extracts version from package.json and git context
+- Variables passed to VPS deployment via environment exports
+- Docker containers receive version info via build arguments
+- React app accesses via process.env.REACT_APP_* variables
+
 ### Environment Setup
 
 Client requires `.env` file with:
@@ -153,13 +173,51 @@ REACT_APP_SERVER_URL=http://localhost:3001
 - **Reusable Components**: AppHeader and UsernameDisplay components for consistency across views
 - **Enhanced UX**: Keyboard shortcuts, better error handling, and improved toast positioning
 - **Host Privileges**: Room hosts bypass password requirements for their own private rooms
+- **CI/CD Integration**: Full GitHub Actions workflow for automated deployment to production VPS
+- **Version Display**: Automatic build information display with version modal in app header
+- **Local Testing Support**: Use `act` tool for testing GitHub Actions workflows locally
+- **Deployment Documentation**: Comprehensive DEPLOYMENT.md with setup and troubleshooting guides
 - Don't ever run npm start, I will do that myself and test changes there
 - You can run npm run build to check for build errors though
 - **Always ask before committing any code**
 
-## Docker Deployment
+## Deployment & CI/CD
 
-### Environment Configuration
+### GitHub Actions CI/CD Pipeline
+The application features a comprehensive automated deployment system:
+
+**Automated Deployment:**
+- Triggers on pushes to `main` branch (including PR merges)
+- Full CI/CD pipeline with build verification and container deployment
+- SSH-based deployment to VPS with comprehensive error handling
+- Automatic version injection from package.json and git context
+
+**Manual Deployment:**
+- Workflow dispatch with environment selection (production/staging)
+- Local testing capabilities using `act` tool
+- Rollback safety with git history maintenance
+
+**Key Features:**
+- Pre-deployment dependency installation and application building
+- Container verification after deployment
+- Comprehensive logging and error reporting
+- Secure SSH key management via GitHub Secrets
+- Environment-specific deployment configurations
+
+**Required GitHub Secrets:**
+- `VPS_HOST`: Server IP or hostname
+- `VPS_USER`: SSH username (typically `deploy`)
+- `VPS_SSH_KEY`: Private SSH key for authentication
+- `VPS_PORT`: SSH port (optional, defaults to 22)
+
+**Local Testing:**
+- Use `act` tool to test workflows locally before pushing
+- Create `.secrets` file for local testing credentials
+- Dry-run capabilities for workflow validation
+
+### Docker Deployment
+
+#### Environment Configuration
 The application supports both local and production Docker deployments with environment variable management:
 
 **Local Deployment:**
