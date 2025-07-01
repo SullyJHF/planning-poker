@@ -18,7 +18,6 @@ export const CardDeck: React.FC<CardDeckProps> = ({ onSelectCard, selectedCard, 
     const [startX, setStartX] = useState(0);
     const [lastRotation, setLastRotation] = useState(0);
     const deckRef = useRef<HTMLDivElement>(null);
-    const lastUpdateRef = useRef<number>(0);
     
     // Check if device is mobile with responsive update
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
