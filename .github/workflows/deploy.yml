@@ -57,6 +57,12 @@ jobs:
             export GIT_BRANCH="${{ github.ref_name }}"
             export GITHUB_RUN_ID="${{ github.run_id }}"
             
+            # Set version information for build
+            export REACT_APP_VERSION="$(node -p "require('./package.json').version" 2>/dev/null || echo "unknown")"
+            export REACT_APP_BUILD_HASH="${{ github.sha }}"
+            export REACT_APP_BUILD_BRANCH="${{ github.ref_name }}"
+            export REACT_APP_BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            
             echo "🚀 Starting deployment..."
             echo "Environment: $DEPLOY_ENV"
             echo "Commit: $GIT_COMMIT"

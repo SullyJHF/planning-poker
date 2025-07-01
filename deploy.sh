@@ -89,11 +89,11 @@ deploy() {
     # Set build version information
     log_info "Setting build version information..."
     
-    # Get version info
-    BUILD_VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "unknown")
-    BUILD_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-    BUILD_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
-    BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    # Get version info (use GitHub Actions variables if available, otherwise determine locally)
+    BUILD_VERSION="${REACT_APP_VERSION:-$(node -p "require('./package.json').version" 2>/dev/null || echo "unknown")}"
+    BUILD_HASH="${REACT_APP_BUILD_HASH:-$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")}"
+    BUILD_BRANCH="${REACT_APP_BUILD_BRANCH:-$(git branch --show-current 2>/dev/null || echo "unknown")}"
+    BUILD_TIME="${REACT_APP_BUILD_TIME:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
     
     # Export for docker-compose
     export REACT_APP_VERSION="$BUILD_VERSION"
@@ -135,11 +135,11 @@ deploy_local() {
     # Set build version information
     log_info "Setting build version information..."
     
-    # Get version info
-    BUILD_VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "unknown")
-    BUILD_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-    BUILD_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
-    BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    # Get version info (use GitHub Actions variables if available, otherwise determine locally)
+    BUILD_VERSION="${REACT_APP_VERSION:-$(node -p "require('./package.json').version" 2>/dev/null || echo "unknown")}"
+    BUILD_HASH="${REACT_APP_BUILD_HASH:-$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")}"
+    BUILD_BRANCH="${REACT_APP_BUILD_BRANCH:-$(git branch --show-current 2>/dev/null || echo "unknown")}"
+    BUILD_TIME="${REACT_APP_BUILD_TIME:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
     
     # Export for docker-compose
     export REACT_APP_VERSION="$BUILD_VERSION"
