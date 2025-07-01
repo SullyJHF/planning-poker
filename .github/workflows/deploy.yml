@@ -66,7 +66,7 @@ jobs:
             
             # Set version information for build
             export REACT_APP_VERSION="${{ steps.version.outputs.version }}"
-            export REACT_APP_BUILD_HASH="${{ github.sha }}"
+            export REACT_APP_BUILD_HASH="$(echo ${{ github.sha }} | cut -c1-7)"
             export REACT_APP_BUILD_BRANCH="${{ github.ref_name }}"
             export REACT_APP_BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             
