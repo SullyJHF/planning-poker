@@ -110,7 +110,8 @@ deploy() {
     
     # Build and start containers
     log_info "Building and starting containers..."
-    docker_compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+    docker_compose -f docker-compose.prod.yml --env-file .env.production build --pull
+    docker_compose -f docker-compose.prod.yml --env-file .env.production up -d
     
     # Wait for containers to be healthy
     log_info "Waiting for containers to be healthy..."
